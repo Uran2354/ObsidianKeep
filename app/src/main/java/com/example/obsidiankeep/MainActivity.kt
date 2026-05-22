@@ -5,53 +5,20 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.biometric.BiometricPrompt
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -66,6 +33,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.obsidiankeep.data.Folder
+import com.example.obsidiankeep.data.Note
 import java.util.UUID
 
 class MainActivity : FragmentActivity() {
@@ -150,7 +119,6 @@ class MainActivity : FragmentActivity() {
                         )
                     }
 
-                    // УЛЬТРАСТАБИЛЬНОСТЬ: Отключаем тяжелые 3D-анимации переходов для экрана редактора!
                     composable(
                         route = "editor/{noteId}?isNew={isNew}&folderId={folderId}",
                         arguments = listOf(
@@ -158,10 +126,10 @@ class MainActivity : FragmentActivity() {
                             navArgument("isNew") { type = NavType.BoolType; defaultValue = false },
                             navArgument("folderId") { type = NavType.StringType; nullable = true; defaultValue = null }
                         ),
-                        enterTransition = { EnterTransition.None },
-                        exitTransition = { ExitTransition.None },
-                        popEnterTransition = { EnterTransition.None },
-                        popExitTransition = { ExitTransition.None }
+                        enterTransition = { androidx.compose.animation.EnterTransition.None },
+                        exitTransition = { androidx.compose.animation.ExitTransition.None },
+                        popEnterTransition = { androidx.compose.animation.EnterTransition.None },
+                        popExitTransition = { androidx.compose.animation.ExitTransition.None }
                     ) { backStackEntry ->
                         val noteId = backStackEntry.arguments?.getString("noteId") ?: ""
                         val isNew = backStackEntry.arguments?.getBoolean("isNew") ?: false
@@ -234,6 +202,7 @@ class MainActivity : FragmentActivity() {
                 addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
 
+            // Запускаем окно выбора приложения
             startActivity(android.content.Intent.createChooser(shareIntent, "Экспорт в Obsidian (ПК)"))
         } catch (e: Exception) {
             runOnUiThread {
@@ -241,8 +210,7 @@ class MainActivity : FragmentActivity() {
             }
         }
     }
-}
-
+} // <--- КЛАСС MAIN_ACTIVITY ИДЕАЛЬНО И НАДЁЖНО ЗАКРЫЛСЯ СТРОГО ЗДЕСЬ!
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MainScreen(
@@ -262,7 +230,11 @@ fun MainScreen(
     var showMoveMenu by remember { mutableStateOf(false) }
 
     var selectedNoteIds by remember { mutableStateOf(setOf<String>()) }
-    val isSelectionMode = selectedNoteIds.isNotEmpty()
+    var selectedFolderIds by remember { mutableStateOf(setOf<String>()) }
+
+    val isNoteSelectionMode = selectedNoteIds.isNotEmpty()
+    val isFolderSelectionMode = selectedFolderIds.isNotEmpty()
+    val isAnySelectionMode = isNoteSelectionMode || isFolderSelectionMode
 
     var lastClickTime by remember { mutableLongStateOf(0L) }
 
@@ -299,48 +271,64 @@ fun MainScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (isSelectionMode && currentTab == "notes") {
+                if (isAnySelectionMode) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         Button(
-                            onClick = { selectedNoteIds = emptySet() },
+                            onClick = {
+                                selectedNoteIds = emptySet()
+                                selectedFolderIds = emptySet()
+                            },
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF333333))
                         ) { Text("Отмена", color = Color.White) }
-                        Text(text = "Выбрано: ${selectedNoteIds.count()}", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+
+                        Text(
+                            text = "Выбрано: ${if (currentTab == "notes") selectedNoteIds.count() else selectedFolderIds.count()}",
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
 
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Box {
-                            FilledIconButton(
-                                onClick = { showMoveMenu = true },
-                                colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color(0xFF333333)),
-                                modifier = Modifier.width(40.dp).height(40.dp)
-                            ) { Text("📁", fontSize = 18.sp) }
+                        if (currentTab == "notes") {
+                            Box {
+                                FilledIconButton(
+                                    onClick = { showMoveMenu = true },
+                                    colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color(0xFF333333)),
+                                    modifier = Modifier.width(40.dp).height(40.dp)
+                                ) { Text("📁", fontSize = 18.sp) }
 
-                            DropdownMenu(
-                                expanded = showMoveMenu,
-                                onDismissRequest = { showMoveMenu = false },
-                                modifier = Modifier.background(Color(0xFF1E1E1E))
-                            ) {
-                                folders.forEach { folder ->
-                                    DropdownMenuItem(
-                                        text = { Text(folder.name, color = Color.White) },
-                                        onClick = {
-                                            viewModel.moveMultipleNotes(selectedNoteIds.toList(), folder.id)
-                                            selectedNoteIds = emptySet()
-                                            showMoveMenu = false
-                                        }
-                                    )
+                                DropdownMenu(
+                                    expanded = showMoveMenu,
+                                    onDismissRequest = { showMoveMenu = false },
+                                    modifier = Modifier.background(Color(0xFF1E1E1E))
+                                ) {
+                                    folders.forEach { folder ->
+                                        DropdownMenuItem(
+                                            text = { Text(folder.name, color = Color.White) },
+                                            onClick = {
+                                                viewModel.moveMultipleNotes(selectedNoteIds.toList(), folder.id)
+                                                selectedNoteIds = emptySet()
+                                                showMoveMenu = false
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }
 
                         FilledIconButton(
                             onClick = {
-                                viewModel.deleteMultipleNotes(selectedNoteIds.toList())
-                                selectedNoteIds = emptySet()
+                                if (currentTab == "notes") {
+                                    viewModel.deleteMultipleNotes(selectedNoteIds.toList())
+                                    selectedNoteIds = emptySet()
+                                } else {
+                                    viewModel.deleteMultipleFolders(selectedFolderIds.toList())
+                                    selectedFolderIds = emptySet()
+                                }
                             },
                             colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color(0xFF900C3F)),
                             modifier = Modifier.width(40.dp).height(40.dp)
@@ -400,7 +388,6 @@ fun MainScreen(
                     }
                 }
             }
-
             TextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
@@ -444,8 +431,8 @@ fun MainScreen(
                                 .height(130.dp)
                                 .border(width = if (isSelected) 3.dp else 0.dp, color = neonBorderColor, shape = RoundedCornerShape(10.dp))
                                 .combinedClickable(
-                                    onClick = { if (isSelectionMode) { selectedNoteIds = if (isSelected) selectedNoteIds - note.id else selectedNoteIds + note.id } else { onNoteClick(note.id) } },
-                                    onLongClick = { if (!isSelectionMode) { selectedNoteIds = selectedNoteIds + note.id } }
+                                    onClick = { if (isNoteSelectionMode) { selectedNoteIds = if (isSelected) selectedNoteIds - note.id else selectedNoteIds + note.id } else { onNoteClick(note.id) } },
+                                    onLongClick = { if (!isNoteSelectionMode) { selectedNoteIds = selectedNoteIds + note.id } }
                                 ),
                             shape = RoundedCornerShape(10.dp),
                             colors = CardDefaults.cardColors(containerColor = Color(note.color))
@@ -464,12 +451,28 @@ fun MainScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    items(filteredFolders) { folder ->
+                    items(filteredFolders, key = { it.id }) { folder ->
+                        val isFolderSelected = selectedFolderIds.contains(folder.id)
+
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(Color(0xFF1E1E1E), RoundedCornerShape(8.dp))
-                                .clickable { onFolderClick(folder.id, folder.name) }
+                                .background(if (isFolderSelected) Color(0xFF2A2A2A) else Color(0xFF1E1E1E), RoundedCornerShape(8.dp))
+                                .border(width = if (isFolderSelected) 2.dp else 0.dp, color = if (isFolderSelected) Color(0xFFBB86FC) else Color.Transparent, shape = RoundedCornerShape(8.dp))
+                                .combinedClickable(
+                                    onClick = {
+                                        if (isFolderSelectionMode) {
+                                            selectedFolderIds = if (isFolderSelected) selectedFolderIds - folder.id else selectedFolderIds + folder.id
+                                        } else {
+                                            onFolderClick(folder.id, folder.name)
+                                        }
+                                    },
+                                    onLongClick = {
+                                        if (!isFolderSelectionMode) {
+                                            selectedFolderIds = selectedFolderIds + folder.id
+                                        }
+                                    }
+                                )
                                 .padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -482,7 +485,7 @@ fun MainScreen(
             }
         }
 
-        if (!isSelectionMode) {
+        if (!isAnySelectionMode) {
             FloatingActionButton(
                 onClick = {
                     val currentTime = System.currentTimeMillis()
@@ -495,17 +498,5 @@ fun MainScreen(
                 modifier = Modifier.align(Alignment.BottomEnd).padding(24.dp)
             ) { Text(text = if (currentTab == "notes") "+ Заметка" else "+ Папка", modifier = Modifier.padding(horizontal = 16.dp), color = Color.Black, fontWeight = FontWeight.Bold) }
         }
-    }
-}
-
-fun localGetNeonBorderColor(colorInt: Int): Color {
-    return try {
-        val hsv = FloatArray(3)
-        android.graphics.Color.colorToHSV(colorInt, hsv)
-        hsv[1] = 0.95f
-        hsv[2] = 1.0f
-        Color(android.graphics.Color.HSVToColor(hsv))
-    } catch (e: Exception) {
-        Color(0xFFBB86FC)
     }
 }

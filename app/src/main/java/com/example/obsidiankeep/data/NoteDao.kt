@@ -32,6 +32,9 @@ interface NoteDao {
     @Query("UPDATE notes SET folderId = :folderId WHERE id = :noteId")
     suspend fun moveNoteToFolder(noteId: String, folderId: String?)
 
+    @Query("DELETE FROM folders WHERE id IN (:folderIds)")
+    suspend fun deleteFoldersByIds(folderIds: List<String>)
+
     @Query("DELETE FROM links WHERE sourceId = :sourceId")
     suspend fun deleteLinksFromNote(sourceId: String)
 

@@ -182,4 +182,11 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
         sb.append(note.content)
         return sb.toString()
     }
+    fun deleteMultipleFolders(folderIds: List<String>) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                dao.deleteFoldersByIds(folderIds)
+            }
+        }
+    }
 }
