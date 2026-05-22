@@ -22,10 +22,12 @@ fun LineNumberedTextField(
 ) {
     val scrollState = rememberScrollState()
 
-    // СВЕРХБЫСТРЫЙ И БЕЗОПАСНЫЙ РАСЧЕТ СТРОК: Считаем физические строки без перегрузки видеочипа
-    val linesText = remember(value) {
-        val lines = value.split("\n")
-        val totalLines = maxOf(lines.size, 1)
+    // ИЗОЛИРОВАННЫЙ СТЕЙТ КОЛИЧЕСТВА СТРОК: Хранит число строк без перегрузки RenderThread
+    var lineCountState by remember { mutableIntStateOf(1) }
+
+    // Генерируем столбец цифр на основе реального визуального отображения на экране смартфона
+    val linesText = remember(lineCountState, value) {
+        val totalLines = maxOf(lineCountState, 1)
         (1..totalLines).joinToString("\n")
     }
 
@@ -36,7 +38,7 @@ fun LineNumberedTextField(
             .background(Color(0xFF1E1E1E))
             .verticalScroll(scrollState)
     ) {
-        // Панель номеров строк
+        // Панель номеров строк (Идеально синхронизирована по высоте шрифта)
         Text(
             text = linesText,
             style = TextStyle(
@@ -51,7 +53,7 @@ fun LineNumberedTextField(
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
 
-        // Разделительная линия
+        // Разделительный нативный бордюр
         Box(
             modifier = Modifier
                 .fillMaxHeight()
@@ -63,6 +65,12 @@ fun LineNumberedTextField(
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
+            // ИСПРАВЛЕНИЕ БАГА: Перехватываем геометрию макета и обновляем счетчик только при реальном изменении строк
+            onTextLayout = { textLayoutResult ->
+                if (lineCountState != textLayoutResult.lineCount) {
+                    lineCountState = textLayoutResult.lineCount
+                }
+            },
             textStyle = TextStyle(
                 color = Color.White,
                 fontSize = 16.sp,
