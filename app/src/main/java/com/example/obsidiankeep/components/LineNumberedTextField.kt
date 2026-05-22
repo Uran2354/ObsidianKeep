@@ -13,6 +13,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 
 @Composable
 fun LineNumberedTextField(
@@ -21,11 +22,19 @@ fun LineNumberedTextField(
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
-
-    // ИЗОЛИРОВАННЫЙ СТЕЙТ КОЛИЧЕСТВА СТРОК: Хранит число строк без перегрузки RenderThread
     var lineCountState by remember { mutableIntStateOf(1) }
 
-    // Генерируем столбец цифр на основе реального визуального отображения на экране смартфона
+    // Считаем количество строк
+    val lineCount = value.count { it == '\n' } + 1
+
+    // Автоскролл: активируется, если строк больше 15
+    LaunchedEffect(value, scrollState.maxValue) {
+        if (lineCount > 13) {
+            delay(30) // Микропауза для плавной отработки движка Compose
+            scrollState.animateScrollTo(scrollState.maxValue)
+        }
+    }
+
     val linesText = remember(lineCountState, value) {
         val totalLines = maxOf(lineCountState, 1)
         (1..totalLines).joinToString("\n")
@@ -38,7 +47,7 @@ fun LineNumberedTextField(
             .background(Color(0xFF1E1E1E))
             .verticalScroll(scrollState)
     ) {
-        // Панель номеров строк (Идеально синхронизирована по высоте шрифта)
+        // Панель номеров строк (добавляем ей нижний отступ, если текст длинный)
         Text(
             text = linesText,
             style = TextStyle(
@@ -49,7 +58,10 @@ fun LineNumberedTextField(
             ),
             modifier = Modifier
                 .width(44.dp)
-                .padding(top = 12.dp),
+                .padding(
+                    top = 12.dp,
+                    bottom = if (lineCount > 13) 340.dp else 12.dp // Резервируем место под клавиатуру для цифр
+                ),
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
 
@@ -65,7 +77,6 @@ fun LineNumberedTextField(
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
-            // ИСПРАВЛЕНИЕ БАГА: Перехватываем геометрию макета и обновляем счетчик только при реальном изменении строк
             onTextLayout = { textLayoutResult ->
                 if (lineCountState != textLayoutResult.lineCount) {
                     lineCountState = textLayoutResult.lineCount
@@ -79,7 +90,14 @@ fun LineNumberedTextField(
             ),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(
+                    top = 12.dp,
+                    start = 12.dp,
+                    end = 12.dp,
+                    // САМЫЙ ВАЖНЫЙ ФИКС: если строк > 15, создаем искусственное пустое поле снизу в 340dp.
+                    // Клавиатура будет перекрывать этот пустой отступ, а весь текст останется НАД ней!
+                    bottom = if (lineCount > 13) 340.dp else 12.dp
+                ),
             decorationBox = { innerTextField ->
                 if (value.isEmpty()) {
                     Text(

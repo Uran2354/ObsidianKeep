@@ -74,6 +74,8 @@ fun EditorScreen(
     }
 
     Scaffold(
+        modifier = Modifier
+            .fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = { Text("Редактор", color = Color.White) },

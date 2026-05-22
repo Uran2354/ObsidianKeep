@@ -210,6 +210,44 @@ class MainActivity : FragmentActivity() {
             }
         }
     }
+
+    fun shareMultipleNotesAsMarkdownFiles(notesToExport: List<com.example.obsidiankeep.data.Note>) {
+        try {
+            val uriList = ArrayList<android.net.Uri>()
+
+            // Циклом создаем отдельный файл для каждой выделенной заметки
+            for (note in notesToExport) {
+                val safeTitle = note.title.ifEmpty { "Без названия" }.replace("[\\\\/:*?\"<>|]".toRegex(), "_")
+                val fileName = "$safeTitle.md"
+                val cacheFile = java.io.File(cacheDir, fileName)
+                cacheFile.writeText(note.content)
+
+                // Генерируем URI через ваш FileProvider
+                val fileUri = androidx.core.content.FileProvider.getUriForFile(
+                    this,
+                    "${packageName}.fileprovider",
+                    cacheFile
+                )
+                uriList.add(fileUri)
+            }
+
+            if (uriList.isNotEmpty()) {
+                // Используем ACTION_SEND_MULTIPLE для отправки пачки файлов сразу
+                val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND_MULTIPLE).apply {
+                    type = "text/markdown"
+                    putParcelableArrayListExtra(android.content.Intent.EXTRA_STREAM, uriList)
+                    addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION) // Даем права на чтение файлов
+                }
+
+                // Открываем окно выбора приложения (в Obsidian они прилетят как разные файлы)
+                startActivity(android.content.Intent.createChooser(shareIntent, "Экспорт заметок в Obsidian"))
+            }
+        } catch (e: Exception) {
+            runOnUiThread {
+                Toast.makeText(applicationContext, "Ошибка экспорта: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 } // <--- КЛАСС MAIN_ACTIVITY ИДЕАЛЬНО И НАДЁЖНО ЗАКРЫЛСЯ СТРОГО ЗДЕСЬ!
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -221,6 +259,9 @@ fun MainScreen(
     onFolderClick: (String, String) -> Unit,
     onCreateNewNoteClick: () -> Unit
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val activity = context as? MainActivity
+
     val notes by viewModel.rootNotes.collectAsState()
     val folders by viewModel.folders.collectAsState()
     val activeSortOrder by viewModel.sortOrder.collectAsState()
@@ -294,6 +335,27 @@ fun MainScreen(
 
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         if (currentTab == "notes") {
+                            // --- НОВАЯ ФИОЛЕТОВАЯ КНОПКА ЭКСПОРТА МНОЖЕСТВА ЗАМЕТОК ---
+                            FilledIconButton(
+                                onClick = {
+                                    // Получаем список всех выделенных объектов заметок
+                                    val notesToExport = notes.filter { selectedNoteIds.contains(it.id) }
+
+                                    if (notesToExport.isNotEmpty()) {
+                                        // Вызываем новый метод паблишинга множества файлов
+                                        activity?.shareMultipleNotesAsMarkdownFiles(notesToExport)
+
+                                        // Сбрасываем выделение, чтобы закрыть панель выбора
+                                        selectedNoteIds = emptySet()
+                                    }
+                                },
+                                colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color(0xFF6A5ACD)), // Наш фиолетовый цвет
+                                modifier = Modifier.width(40.dp).height(40.dp)
+                            ) {
+                                Text("📤", fontSize = 18.sp)
+                            }
+
+                            // Существующая кнопка переноса заметок в папку (без изменений)
                             Box {
                                 FilledIconButton(
                                     onClick = { showMoveMenu = true },
@@ -320,6 +382,7 @@ fun MainScreen(
                             }
                         }
 
+                        // Существующая кнопка удаления в корзину (без изменений)
                         FilledIconButton(
                             onClick = {
                                 if (currentTab == "notes") {
