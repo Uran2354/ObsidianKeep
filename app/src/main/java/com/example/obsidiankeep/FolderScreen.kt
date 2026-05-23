@@ -21,15 +21,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.obsidiankeep.data.Note
-import com.example.obsidiankeep.data.Folder
-import com.example.obsidiankeep.SortOrder
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -41,6 +40,9 @@ fun FolderScreen(
     onNoteClick: (String) -> Unit,
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
+    val activity = remember(context) { context as? MainActivity }
+
     val allNotes by viewModel.allNotes.collectAsState()
     val folders by viewModel.folders.collectAsState()
     val activeSortOrder by viewModel.sortOrder.collectAsState()
@@ -61,6 +63,7 @@ fun FolderScreen(
     var selectedNoteIds by remember { mutableStateOf(setOf<String>()) }
     val isSelectionMode = selectedNoteIds.isNotEmpty()
 
+    // Пересчитываем список заметок только при реальном изменении данных
     val filteredFolderNotes = remember(allNotes, folderId, folderSearchQuery, activeSortOrder) {
         val baseList = allNotes.filter { note ->
             note.folderId == folderId && (
@@ -76,14 +79,11 @@ fun FolderScreen(
     }
 
     LaunchedEffect(isEditingName) {
-        if (isEditingName) {
-            focusRequester.requestFocus()
-        }
+        if (isEditingName) focusRequester.requestFocus()
     }
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF121212))) {
         Column(modifier = Modifier.fillMaxSize()) {
-
             TopAppBar(
                 title = {
                     if (isSelectionMode) {
@@ -102,6 +102,7 @@ fun FolderScreen(
                             BasicTextField(
                                 value = editedName,
                                 onValueChange = { editedName = it },
+                                cursorBrush = SolidColor(Color.White),
                                 textStyle = MaterialTheme.typography.titleLarge.copy(color = Color.White, fontWeight = FontWeight.Bold),
                                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                                 keyboardActions = KeyboardActions(onDone = {
@@ -118,7 +119,10 @@ fun FolderScreen(
                                 text = currentFolder?.name ?: editedName,
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold,
-                                modifier = Modifier.clickable { if (canRename) isEditingName = true else Toast.makeText(viewModel.getApplication(), "Сначала откройте папку отпечатком", Toast.LENGTH_SHORT).show() }.fillMaxWidth()
+                                modifier = Modifier.clickable {
+                                    if (canRename) isEditingName = true
+                                    else Toast.makeText(viewModel.getApplication(), "Сначала откройте папку отпечатком", Toast.LENGTH_SHORT).show()
+                                }.fillMaxWidth()
                             )
                         }
                     }
@@ -137,6 +141,18 @@ fun FolderScreen(
                         var showMoveMenu by remember { mutableStateOf(false) }
 
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            FilledIconButton(
+                                onClick = {
+                                    val notesToExport = filteredFolderNotes.filter { selectedNoteIds.contains(it.id) }
+                                    if (notesToExport.isNotEmpty()) {
+                                        activity?.shareMultipleNotesAsMarkdownFiles(notesToExport)
+                                        selectedNoteIds = emptySet()
+                                    }
+                                },
+                                colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color(0xFF6A5ACD)),
+                                modifier = Modifier.size(40.dp)
+                            ) { Text("📤", fontSize = 18.sp) }
+
                             Box {
                                 FilledIconButton(
                                     onClick = { showMoveMenu = true },
@@ -227,7 +243,6 @@ fun FolderScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1A1A1A))
             )
-
             if (!isSelectionMode) {
                 TextField(
                     value = folderSearchQuery,
@@ -249,31 +264,26 @@ fun FolderScreen(
             ) {
                 items(filteredFolderNotes, key = { it.id }) { note ->
                     val isSelected = selectedNoteIds.contains(note.id)
-
                     val cardColor = remember(note.color) { Color(note.color) }
 
-                    val neonColor = if (isSelected) {
-                        try {
+                    // Тяжелые вычисления неоновой рамки изолированы в remember
+                    val neonColor = remember(isSelected, note.color) {
+                        if (isSelected) {
                             val hsv = FloatArray(3)
                             android.graphics.Color.colorToHSV(note.color, hsv)
-                            hsv[1] = 0.95f // Сочная лазерная насыщенность неона
-                            hsv[2] = 1.0f  // Максимальная яркость неона
+                            hsv[1] = 0.95f
+                            hsv[2] = 1.0f
                             Color(android.graphics.Color.HSVToColor(hsv))
-                        } catch (e: Exception) {
-                            Color(0xFFBB86FC)
+                        } else {
+                            Color.Transparent
                         }
-                    } else {
-                        Color.Transparent
                     }
-
-                    // Кэшируем готовый объект цвета в remember
-                    val borderColor = remember(isSelected, note.color) { neonColor }
 
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(130.dp)
-                            .border(width = if (isSelected) 3.dp else 0.dp, color = borderColor, shape = RoundedCornerShape(10.dp))
+                            .border(width = if (isSelected) 3.dp else 0.dp, color = neonColor, shape = RoundedCornerShape(10.dp))
                             .combinedClickable(
                                 onClick = {
                                     if (isSelectionMode) {
@@ -302,7 +312,7 @@ fun FolderScreen(
         }
 
         if (!isSelectionMode) {
-            var lastFolderClickTime by remember { androidx.compose.runtime.mutableLongStateOf(0L) }
+            var lastFolderClickTime by remember { mutableLongStateOf(0L) }
 
             FloatingActionButton(
                 onClick = {
@@ -319,3 +329,4 @@ fun FolderScreen(
         }
     }
 }
+

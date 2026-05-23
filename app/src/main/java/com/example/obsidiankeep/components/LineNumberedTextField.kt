@@ -1,4 +1,4 @@
-package com.example.obsidiankeep.components // Проверьте ваш package!
+package com.example.obsidiankeep.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -9,11 +9,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+
+// Выносим стили в статические константы, чтобы не создавать объекты при каждой рекомпозиции
+private val BackgroundModifier = Modifier.fillMaxSize().background(Color(0xFF1E1E1E))
+private val LineNumbersStyle = TextStyle(color = Color(0xFF555555), fontSize = 16.sp, fontFamily = FontFamily.Monospace, lineHeight = 24.sp)
+private val InputTextStyle = TextStyle(color = Color.White, fontSize = 16.sp, fontFamily = FontFamily.Monospace, lineHeight = 24.sp)
+private val PlaceholderStyle = TextStyle(color = Color(0xFF666666), fontSize = 16.sp, fontFamily = FontFamily.Monospace)
+private val WhiteBrush = SolidColor(Color.White)
 
 @Composable
 fun LineNumberedTextField(
@@ -24,88 +34,72 @@ fun LineNumberedTextField(
     val scrollState = rememberScrollState()
     var lineCountState by remember { mutableIntStateOf(1) }
 
-    // Считаем количество строк
-    val lineCount = value.count { it == '\n' } + 1
+    var textFieldValueState by remember {
+        mutableStateOf(TextFieldValue(text = value, selection = androidx.compose.ui.text.TextRange(value.length)))
+    }
 
-    // Автоскролл: активируется, если строк больше 15
-    LaunchedEffect(value, scrollState.maxValue) {
-        if (lineCount > 13) {
-            delay(30) // Микропауза для плавной отработки движка Compose
+    LaunchedEffect(value) {
+        if (value != textFieldValueState.text) {
+            textFieldValueState = textFieldValueState.copy(text = value)
+        }
+    }
+
+    val lineCount = remember(textFieldValueState.text) { textFieldValueState.text.count { it == '\n' } + 1 }
+
+    val dynamicBottomPadding = remember(lineCount) {
+        val calculatedPadding = lineCount * 24
+        if (calculatedPadding > 320) 320.dp else calculatedPadding.dp
+    }
+
+    LaunchedEffect(textFieldValueState.text) {
+        val cursorPosition = textFieldValueState.selection.end
+        val textLength = textFieldValueState.text.length
+        if (lineCount > 1 && cursorPosition >= textLength) {
+            delay(40)
             scrollState.animateScrollTo(scrollState.maxValue)
         }
     }
 
-    val linesText = remember(lineCountState, value) {
+    val linesText = remember(lineCountState) {
         val totalLines = maxOf(lineCountState, 1)
         (1..totalLines).joinToString("\n")
     }
 
     Row(
         modifier = modifier
-            .fillMaxHeight()
-            .fillMaxWidth()
-            .background(Color(0xFF1E1E1E))
+            .then(BackgroundModifier)
             .verticalScroll(scrollState)
     ) {
-        // Панель номеров строк (добавляем ей нижний отступ, если текст длинный)
         Text(
             text = linesText,
-            style = TextStyle(
-                color = Color(0xFF555555),
-                fontSize = 16.sp,
-                fontFamily = FontFamily.Monospace,
-                lineHeight = 24.sp
-            ),
-            modifier = Modifier
-                .width(44.dp)
-                .padding(
-                    top = 12.dp,
-                    bottom = if (lineCount > 13) 340.dp else 12.dp // Резервируем место под клавиатуру для цифр
-                ),
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            style = LineNumbersStyle,
+            modifier = Modifier.width(44.dp).padding(top = 12.dp, bottom = dynamicBottomPadding),
+            textAlign = TextAlign.Center
         )
 
-        // Разделительный нативный бордюр
-        Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .width(1.dp)
-                .background(Color(0xFF333333))
-        )
+        Box(modifier = Modifier.fillMaxHeight().width(1.dp).background(Color(0xFF333333)))
 
-        // Текстовое поле ввода
         BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
+            value = textFieldValueState,
+            onValueChange = { newTextFieldValue ->
+                textFieldValueState = newTextFieldValue
+                if (value != newTextFieldValue.text) {
+                    onValueChange(newTextFieldValue.text)
+                }
+            },
+            cursorBrush = WhiteBrush,
             onTextLayout = { textLayoutResult ->
                 if (lineCountState != textLayoutResult.lineCount) {
                     lineCountState = textLayoutResult.lineCount
                 }
             },
-            textStyle = TextStyle(
-                color = Color.White,
-                fontSize = 16.sp,
-                fontFamily = FontFamily.Monospace,
-                lineHeight = 24.sp
-            ),
+            textStyle = InputTextStyle,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(
-                    top = 12.dp,
-                    start = 12.dp,
-                    end = 12.dp,
-                    // САМЫЙ ВАЖНЫЙ ФИКС: если строк > 15, создаем искусственное пустое поле снизу в 340dp.
-                    // Клавиатура будет перекрывать этот пустой отступ, а весь текст останется НАД ней!
-                    bottom = if (lineCount > 13) 340.dp else 12.dp
-                ),
+                .padding(top = 12.dp, start = 12.dp, end = 12.dp, bottom = dynamicBottomPadding),
             decorationBox = { innerTextField ->
-                if (value.isEmpty()) {
-                    Text(
-                        text = "Начните писать... [[Ссылка]] свяжет заметки.",
-                        color = Color(0xFF666666),
-                        fontSize = 16.sp,
-                        fontFamily = FontFamily.Monospace
-                    )
+                if (textFieldValueState.text.isEmpty()) {
+                    Text(text = "Начните писать... [[Ссылка]] свяжет заметки.", style = PlaceholderStyle)
                 }
                 innerTextField()
             }

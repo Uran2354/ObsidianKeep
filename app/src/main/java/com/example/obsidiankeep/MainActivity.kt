@@ -1,5 +1,7 @@
 package com.example.obsidiankeep // Проверьте, что этот package совпадает с вашим!
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
@@ -8,7 +10,6 @@ import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,19 +23,21 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.obsidiankeep.data.Folder
 import com.example.obsidiankeep.data.Note
+import java.io.File
 import java.util.UUID
 
 class MainActivity : FragmentActivity() {
@@ -53,7 +56,6 @@ class MainActivity : FragmentActivity() {
                 color = Color(0xFF121212)
             ) {
                 NavHost(navController = navController, startDestination = "main") {
-
                     composable("main") {
                         MainScreen(
                             viewModel = viewModel,
@@ -92,15 +94,12 @@ class MainActivity : FragmentActivity() {
                             }
                         )
                     }
-
                     composable("folder/{folderId}/{folderName}") { backStackEntry ->
                         val folderId = backStackEntry.arguments?.getString("folderId") ?: ""
                         val folderName = backStackEntry.arguments?.getString("folderName") ?: ""
 
                         DisposableEffect(key1 = folderId) {
-                            onDispose {
-                                viewModel.lockFolderSession(folderId)
-                            }
+                            onDispose { viewModel.lockFolderSession(folderId) }
                         }
 
                         FolderScreen(
@@ -140,9 +139,7 @@ class MainActivity : FragmentActivity() {
                             isNewNote = isNew,
                             initialFolderId = parentFolderId,
                             viewModel = viewModel,
-                            onBack = {
-                                navController.popBackStack()
-                            },
+                            onBack = { navController.popBackStack() },
                             onExportClick = { title, markdownText ->
                                 activity.shareNoteAsMarkdownFile(title, markdownText)
                             }
@@ -186,24 +183,16 @@ class MainActivity : FragmentActivity() {
     fun shareNoteAsMarkdownFile(title: String, contentMarkdown: String) {
         try {
             val safeTitle = title.ifEmpty { "Без названия" }.replace("[\\\\/:*?\"<>|]".toRegex(), "_")
-            val fileName = "$safeTitle.md"
-            val cacheFile = java.io.File(cacheDir, fileName)
+            val cacheFile = File(cacheDir, "$safeTitle.md")
             cacheFile.writeText(contentMarkdown)
 
-            val fileUri = androidx.core.content.FileProvider.getUriForFile(
-                this,
-                "${packageName}.fileprovider",
-                cacheFile
-            )
-
-            val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+            val fileUri = FileProvider.getUriForFile(this, "$packageName.fileprovider", cacheFile)
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/markdown"
-                putExtra(android.content.Intent.EXTRA_STREAM, fileUri)
-                addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                putExtra(Intent.EXTRA_STREAM, fileUri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
-
-            // Запускаем окно выбора приложения
-            startActivity(android.content.Intent.createChooser(shareIntent, "Экспорт в Obsidian (ПК)"))
+            startActivity(Intent.createChooser(shareIntent, "Экспорт в Obsidian (ПК)"))
         } catch (e: Exception) {
             runOnUiThread {
                 Toast.makeText(applicationContext, "Ошибка экспорта: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
@@ -211,36 +200,25 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    fun shareMultipleNotesAsMarkdownFiles(notesToExport: List<com.example.obsidiankeep.data.Note>) {
+    fun shareMultipleNotesAsMarkdownFiles(notesToExport: List<Note>) {
         try {
-            val uriList = ArrayList<android.net.Uri>()
-
-            // Циклом создаем отдельный файл для каждой выделенной заметки
+            val uriList = ArrayList<Uri>()
             for (note in notesToExport) {
                 val safeTitle = note.title.ifEmpty { "Без названия" }.replace("[\\\\/:*?\"<>|]".toRegex(), "_")
-                val fileName = "$safeTitle.md"
-                val cacheFile = java.io.File(cacheDir, fileName)
+                val cacheFile = File(cacheDir, "$safeTitle.md")
                 cacheFile.writeText(note.content)
 
-                // Генерируем URI через ваш FileProvider
-                val fileUri = androidx.core.content.FileProvider.getUriForFile(
-                    this,
-                    "${packageName}.fileprovider",
-                    cacheFile
-                )
+                val fileUri = FileProvider.getUriForFile(this, "$packageName.fileprovider", cacheFile)
                 uriList.add(fileUri)
             }
 
             if (uriList.isNotEmpty()) {
-                // Используем ACTION_SEND_MULTIPLE для отправки пачки файлов сразу
-                val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND_MULTIPLE).apply {
+                val shareIntent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
                     type = "text/markdown"
-                    putParcelableArrayListExtra(android.content.Intent.EXTRA_STREAM, uriList)
-                    addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION) // Даем права на чтение файлов
+                    putParcelableArrayListExtra(Intent.EXTRA_STREAM, uriList)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
-
-                // Открываем окно выбора приложения (в Obsidian они прилетят как разные файлы)
-                startActivity(android.content.Intent.createChooser(shareIntent, "Экспорт заметок в Obsidian"))
+                startActivity(Intent.createChooser(shareIntent, "Экспорт заметок в Obsidian"))
             }
         } catch (e: Exception) {
             runOnUiThread {
@@ -248,7 +226,7 @@ class MainActivity : FragmentActivity() {
             }
         }
     }
-} // <--- КЛАСС MAIN_ACTIVITY ИДЕАЛЬНО И НАДЁЖНО ЗАКРЫЛСЯ СТРОГО ЗДЕСЬ!
+}
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MainScreen(
@@ -259,8 +237,8 @@ fun MainScreen(
     onFolderClick: (String, String) -> Unit,
     onCreateNewNoteClick: () -> Unit
 ) {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val activity = context as? MainActivity
+    val context = LocalContext.current
+    val activity = remember(context) { context as? MainActivity }
 
     val notes by viewModel.rootNotes.collectAsState()
     val folders by viewModel.folders.collectAsState()
@@ -295,16 +273,24 @@ fun MainScreen(
         val baseList = folders.filter { folder ->
             folder.name.contains(searchQuery, ignoreCase = true)
         }
-        when (activeSortOrder) {
-            SortOrder.NEWEST -> baseList.sortedByDescending { it.updatedAt }
-            SortOrder.OLDEST -> baseList.sortedBy { it.updatedAt }
-            SortOrder.ALPHABETIC -> baseList.sortedBy { it.name.lowercase() }
+        val regularFolders = baseList.filter { !it.isProtected }
+        val protectedFolders = baseList.filter { it.isProtected }
+
+        val sortedRegular = when (activeSortOrder) {
+            SortOrder.NEWEST -> regularFolders.sortedByDescending { it.updatedAt }
+            SortOrder.OLDEST -> regularFolders.sortedBy { it.updatedAt }
+            SortOrder.ALPHABETIC -> regularFolders.sortedBy { it.name.lowercase() }
         }
+        val sortedProtected = when (activeSortOrder) {
+            SortOrder.NEWEST -> protectedFolders.sortedByDescending { it.updatedAt }
+            SortOrder.OLDEST -> protectedFolders.sortedBy { it.updatedAt }
+            SortOrder.ALPHABETIC -> protectedFolders.sortedBy { it.name.lowercase() }
+        }
+        sortedRegular + sortedProtected
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -335,32 +321,23 @@ fun MainScreen(
 
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         if (currentTab == "notes") {
-                            // --- НОВАЯ ФИОЛЕТОВАЯ КНОПКА ЭКСПОРТА МНОЖЕСТВА ЗАМЕТОК ---
                             FilledIconButton(
                                 onClick = {
-                                    // Получаем список всех выделенных объектов заметок
                                     val notesToExport = notes.filter { selectedNoteIds.contains(it.id) }
-
                                     if (notesToExport.isNotEmpty()) {
-                                        // Вызываем новый метод паблишинга множества файлов
                                         activity?.shareMultipleNotesAsMarkdownFiles(notesToExport)
-
-                                        // Сбрасываем выделение, чтобы закрыть панель выбора
                                         selectedNoteIds = emptySet()
                                     }
                                 },
-                                colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color(0xFF6A5ACD)), // Наш фиолетовый цвет
-                                modifier = Modifier.width(40.dp).height(40.dp)
-                            ) {
-                                Text("📤", fontSize = 18.sp)
-                            }
+                                colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color(0xFF6A5ACD)),
+                                modifier = Modifier.size(40.dp)
+                            ) { Text("📤", fontSize = 18.sp) }
 
-                            // Существующая кнопка переноса заметок в папку (без изменений)
                             Box {
                                 FilledIconButton(
                                     onClick = { showMoveMenu = true },
                                     colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color(0xFF333333)),
-                                    modifier = Modifier.width(40.dp).height(40.dp)
+                                    modifier = Modifier.size(40.dp)
                                 ) { Text("📁", fontSize = 18.sp) }
 
                                 DropdownMenu(
@@ -382,7 +359,6 @@ fun MainScreen(
                             }
                         }
 
-                        // Существующая кнопка удаления в корзину (без изменений)
                         FilledIconButton(
                             onClick = {
                                 if (currentTab == "notes") {
@@ -394,7 +370,7 @@ fun MainScreen(
                                 }
                             },
                             colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color(0xFF900C3F)),
-                            modifier = Modifier.width(40.dp).height(40.dp)
+                            modifier = Modifier.size(40.dp)
                         ) { Text("🗑", fontSize = 18.sp) }
                     }
                 } else {
@@ -451,6 +427,7 @@ fun MainScreen(
                     }
                 }
             }
+
             TextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
@@ -462,7 +439,6 @@ fun MainScreen(
             )
 
             Spacer(modifier = Modifier.height(8.dp))
-
             if (currentTab == "notes") {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
@@ -473,19 +449,22 @@ fun MainScreen(
                 ) {
                     items(filteredNotes, key = { it.id }) { note ->
                         val isSelected = selectedNoteIds.contains(note.id)
+                        val cardColor = remember(note.color) { Color(note.color) }
 
-                        val neonBorderColor = if (isSelected) {
-                            try {
-                                val hsv = FloatArray(3)
-                                android.graphics.Color.colorToHSV(note.color, hsv)
-                                hsv[1] = 0.95f
-                                hsv[2] = 1.0f
-                                Color(android.graphics.Color.HSVToColor(hsv))
-                            } catch (e: Exception) {
-                                Color(0xFFBB86FC)
+                        val neonBorderColor = remember(isSelected, note.color) {
+                            if (isSelected) {
+                                try {
+                                    val hsv = FloatArray(3)
+                                    android.graphics.Color.colorToHSV(note.color, hsv)
+                                    hsv[1] = 0.95f
+                                    hsv[2] = 1.0f
+                                    Color(android.graphics.Color.HSVToColor(hsv))
+                                } catch (_: Exception) { // ИСПРАВЛЕНО: заменили 'e' на '_', предупреждение пропало
+                                    Color(0xFFBB86FC)
+                                }
+                            } else {
+                                Color.Transparent
                             }
-                        } else {
-                            Color.Transparent
                         }
 
                         Card(
@@ -498,7 +477,7 @@ fun MainScreen(
                                     onLongClick = { if (!isNoteSelectionMode) { selectedNoteIds = selectedNoteIds + note.id } }
                                 ),
                             shape = RoundedCornerShape(10.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color(note.color))
+                            colors = CardDefaults.cardColors(containerColor = cardColor)
                         ) {
                             Column(modifier = Modifier.padding(12.dp)) {
                                 Text(text = note.title, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -559,7 +538,7 @@ fun MainScreen(
                 },
                 containerColor = Color(0xFFBB86FC),
                 modifier = Modifier.align(Alignment.BottomEnd).padding(24.dp)
-            ) { Text(text = if (currentTab == "notes") "+ Заметка" else "+ Папка", modifier = Modifier.padding(horizontal = 16.dp), color = Color.Black, fontWeight = FontWeight.Bold) }
+            ) { Text(text = if (currentTab == "notes") "+ Заметка" else "+ Пaпкa", modifier = Modifier.padding(horizontal = 16.dp), color = Color.Black, fontWeight = FontWeight.Bold) }
         }
     }
 }

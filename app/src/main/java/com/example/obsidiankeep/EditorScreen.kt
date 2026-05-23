@@ -3,19 +3,17 @@ package com.example.obsidiankeep // Проверьте, что этот package 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalFocusManager // ИМПОРТ МЕНЕДЖЕРА ФОКУСА
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.obsidiankeep.components.LineNumberedTextField
 import com.example.obsidiankeep.data.Note
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,24 +25,25 @@ fun EditorScreen(
     onBack: () -> Unit,
     onExportClick: (String, String) -> Unit
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val folders by viewModel.folders.collectAsState()
-
-    // ФИКС ЧЕРНОГО ЭКРАНА: Подключаем системный менеджер фокуса клавиатуры
     val focusManager = LocalFocusManager.current
 
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
-    var color by remember { mutableStateOf(0xFF2C2C2C.toInt()) }
-    var selectedFolderId by remember { mutableStateOf<String?>(initialFolderId) }
+    var color by remember { mutableIntStateOf(0xFF2C2C2C.toInt()) }
+
+    // ИСПРАВЛЕНО: Убрали <String?>, так как Kotlin сам понимает тип из инпута
+    var selectedFolderId by remember { mutableStateOf(initialFolderId) }
 
     var isDataLoaded by remember { mutableStateOf(false) }
     var showFolderMenu by remember { mutableStateOf(false) }
 
-    val keepColors = listOf(
-        0xFF2C2C2C.toInt(), 0xFF603838.toInt(), 0xFF386038.toInt(),
-        0xFF2A4B7C.toInt(), 0xFF6A5ACD.toInt(), 0xFF7D6608.toInt()
-    )
+    val keepColors = remember {
+        listOf(
+            0xFF2C2C2C.toInt(), 0xFF603838.toInt(), 0xFF386038.toInt(),
+            0xFF2A4B7C.toInt(), 0xFF6A5ACD.toInt(), 0xFF7D6608.toInt()
+        )
+    }
 
     LaunchedEffect(noteId) {
         if (!isDataLoaded) {
@@ -65,24 +64,25 @@ fun EditorScreen(
         }
     }
 
-    val saveChanges = {
-        if (isDataLoaded) {
-            viewModel.updateExistingNote(
-                Note(id = noteId, folderId = selectedFolderId, title = title, content = content, color = color)
-            )
+    val saveChanges = remember(isDataLoaded, noteId, selectedFolderId, title, content, color) {
+        {
+            if (isDataLoaded) {
+                // Изменили на мгновенное принудительное сохранение при выходе
+                viewModel.forceSaveChangesNow(
+                    Note(id = noteId, folderId = selectedFolderId, title = title, content = content, color = color)
+                )
+            }
         }
     }
 
     Scaffold(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = { Text("Редактор", color = Color.White) },
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            // ЖЕСТКАЯ ОЧИСТКА: Сначала гасим клавиатуру, затем сохраняем и выходим!
                             focusManager.clearFocus()
                             saveChanges()
                             onBack()
@@ -90,7 +90,7 @@ fun EditorScreen(
                         modifier = Modifier.size(48.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
-                            Text(text = "←", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Normal, modifier = Modifier.offset(y = (-7).dp))
+                            Text(text = "←", color = Color.White, fontSize = 28.sp, modifier = Modifier.offset(y = (-7).dp))
                         }
                     }
                 },
@@ -114,7 +114,7 @@ fun EditorScreen(
                         Box(
                             modifier = Modifier
                                 .size(36.dp)
-                                .background(Color(intColor), CircleShape)
+                                .background(Color(intColor), androidx.compose.foundation.shape.CircleShape)
                                 .clickable {
                                     if (isDataLoaded) {
                                         color = intColor
@@ -180,7 +180,6 @@ fun EditorScreen(
 
                         FilledIconButton(
                             onClick = {
-                                // ЖЕСТКАЯ ОЧИСТКА: Гасим клавиатуру и принудительно сохраняем
                                 focusManager.clearFocus()
                                 saveChanges()
                                 onBack()
@@ -203,11 +202,13 @@ fun EditorScreen(
             }
         }
     ) { innerPadding ->
+        val currentCardColor = remember(color) { Color(color) }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(Color(color))
+                .background(currentCardColor)
         ) {
             if (!isDataLoaded) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

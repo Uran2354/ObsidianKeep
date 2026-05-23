@@ -7,10 +7,15 @@ import com.example.obsidiankeep.data.Folder
 import com.example.obsidiankeep.data.Note
 import com.example.obsidiankeep.data.NoteDatabase
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -22,6 +27,7 @@ enum class SortOrder {
     ALPHABETIC  // По алфавиту
 }
 
+@OptIn(kotlinx.coroutines.FlowPreview::class) // Нужно для работы оператора debounce
 class NoteViewModel(application: Application) : AndroidViewModel(application) {
     private val dao = NoteDatabase.getDatabase(application).noteDao()
 
@@ -33,7 +39,10 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
     private val _unlockedFolderIds = MutableStateFlow<Set<String>>(emptySet())
     val unlockedFolderIds: StateFlow<Set<String>> = _unlockedFolderIds.asStateFlow()
 
-    // ЧИСТЫЕ ПОТОКИ ИЗ БАЗЫ: Без combine, что исключает утечки потоков и зависания экрана!
+    // Буферный поток для отложенного сохранения заметок во время ввода
+    private val noteSaveFlow = MutableSharedFlow<Note>(replay = 0, extraBufferCapacity = 64)
+
+    // ЧИСТЫЕ ПОТОКИ ИЗ БАЗЫ
     val folders: StateFlow<List<Folder>> = dao.getAllFolders()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -42,6 +51,20 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
 
     val allNotes: StateFlow<List<Note>> = dao.getAllNotesRaw()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    init {
+        // НАСТРОЙКА DEBOUNCE: Слушаем поток изменений текста.
+        // Запись в базу Room произойдет только после паузы в 300 миллисекунд.
+        noteSaveFlow
+            .debounce(300)
+            .distinctUntilChanged() // Не сохраняем, если текст не изменился (например, при перемещении курсора)
+            .onEach { note ->
+                withContext(Dispatchers.IO) {
+                    dao.saveNoteWithLinks(note.copy(updatedAt = System.currentTimeMillis()))
+                }
+            }
+            .launchIn(viewModelScope)
+    }
 
     fun changeSortOrder(order: SortOrder) {
         _sortOrder.value = order
@@ -59,13 +82,11 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
         return _unlockedFolderIds.value.contains(folderId)
     }
 
-    // Чистый реактивный поток заметок папки напрямую из Room
     fun getNotesInFolder(folderId: String): StateFlow<List<Note>> {
         return dao.getNotesInFolder(folderId)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     }
 
-    // КОРИУТИНЫ ВВОДА-ВЫВОДА (Строго на IO потоках)
     fun createFolder(name: String) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -132,7 +153,15 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // БЫСТРЫЙ И ОПТИМИЗИРОВАННЫЙ ВВОД ТЕКСТА: Кидаем заметку в асинхронный буфер без блокировки UI
     fun updateExistingNote(note: Note) {
+        viewModelScope.launch {
+            noteSaveFlow.emit(note)
+        }
+    }
+
+    // МГНОВЕННОЕ ПРИНУДИТЕЛЬНОЕ СОХРАНЕНИЕ: Вызывается, когда пользователь нажимает кнопку Назад или Сохранить
+    fun forceSaveChangesNow(note: Note) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 dao.saveNoteWithLinks(note.copy(updatedAt = System.currentTimeMillis()))
@@ -182,6 +211,7 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
         sb.append(note.content)
         return sb.toString()
     }
+
     fun deleteMultipleFolders(folderIds: List<String>) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
