@@ -155,6 +155,12 @@ src/com/example/obsidiankeep/
 
 ## Установка
 
+1 Вариант 
+
+Просто скачайте ObsidianKeep.apk
+
+2 Вариант
+
 ```bash
 git clone https://github.com/Uran2354/ObsidianKeep.git
 cd ObsidianKeep
@@ -162,6 +168,10 @@ cd ObsidianKeep
 ```
 
 Установите `app/build/outputs/apk/debug/app-debug.apk` (API 29+).
+
+3 Вариант
+
+Скачать [ObsidianKeep-v5.zip](https://github.com/user-attachments/files/30327987/ObsidianKeep-v5.zip)
 
 См. **BUILD_FIX.md** для инструкций по Gradle, version catalog и AndroidManifest.
 
