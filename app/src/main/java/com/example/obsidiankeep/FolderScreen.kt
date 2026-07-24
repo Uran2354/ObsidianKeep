@@ -1,4 +1,4 @@
-package com.example.obsidiankeep // Проверьте, что этот package совпадает с вашим!
+package com.example.obsidiankeep
 
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -7,6 +7,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -29,6 +31,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.example.obsidiankeep.ui.theme.NoteColors
+import com.example.obsidiankeep.data.Note
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -45,11 +50,16 @@ fun FolderScreen(
 
     val allNotes by viewModel.allNotes.collectAsState()
     val folders by viewModel.folders.collectAsState()
-    val activeSortOrder by viewModel.sortOrder.collectAsState()
+    val globalSortOrder by viewModel.sortOrder.collectAsState()
+    val activeSortOrder = remember(folderId, globalSortOrder) { viewModel.getFolderSortOrder(folderId) }
     val unlockedIds by viewModel.unlockedFolderIds.collectAsState()
 
     val currentFolder = remember(folders, folderId) { folders.find { it.id == folderId } }
-    val isFolderProtected = currentFolder?.isProtected == true
+    // Decoy-папка "0" выглядит как защищённая в decoy-режиме (для пользователя):
+    // он думает что открыл реальную защищённую папку, но контент — из decoy-папки.
+    val isDecoyFolder = folderId == com.example.obsidiankeep.repository.NoteRepositoryImpl.DECOY_FOLDER_ID
+    val isDecoySession = com.example.obsidiankeep.security.PinManager.get(LocalContext.current).isDecoySession()
+    val isFolderProtected = currentFolder?.isProtected == true || (isDecoyFolder && isDecoySession)
     val isSessionUnlocked = unlockedIds.contains(folderId)
 
     val focusRequester = remember { FocusRequester() }
@@ -58,23 +68,28 @@ fun FolderScreen(
     var isEditingName by remember { mutableStateOf(false) }
     var editedName by remember { mutableStateOf(currentFolder?.name ?: folderName) }
     var folderSearchQuery by remember { mutableStateOf("") }
+    var effectiveFolderQuery by remember { mutableStateOf("") }
+    LaunchedEffect(folderSearchQuery) {
+        kotlinx.coroutines.delay(200)
+        effectiveFolderQuery = folderSearchQuery
+    }
     var showSortMenu by remember { mutableStateOf(false) }
 
     var selectedNoteIds by remember { mutableStateOf(setOf<String>()) }
     val isSelectionMode = selectedNoteIds.isNotEmpty()
 
-    // Пересчитываем список заметок только при реальном изменении данных
-    val filteredFolderNotes = remember(allNotes, folderId, folderSearchQuery, activeSortOrder) {
+    val filteredFolderNotes = remember(allNotes, folderId, effectiveFolderQuery, activeSortOrder) {
         val baseList = allNotes.filter { note ->
-            note.folderId == folderId && (
-                    note.title.contains(folderSearchQuery, ignoreCase = true) ||
-                            note.content.contains(folderSearchQuery, ignoreCase = true)
-                    )
+            note.folderId == folderId &&
+                    note.title.contains(effectiveFolderQuery, ignoreCase = true)
         }
         when (activeSortOrder) {
             SortOrder.NEWEST -> baseList.sortedByDescending { it.updatedAt }
             SortOrder.OLDEST -> baseList.sortedBy { it.updatedAt }
             SortOrder.ALPHABETIC -> baseList.sortedBy { it.title.lowercase() }
+            SortOrder.FAVORITES -> baseList.sortedWith(
+                compareByDescending<Note> { it.isFavorite }.thenByDescending { it.updatedAt }
+            )
         }
     }
 
@@ -83,7 +98,11 @@ fun FolderScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF121212))) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+        ) {
             TopAppBar(
                 title = {
                     if (isSelectionMode) {
@@ -92,9 +111,9 @@ fun FolderScreen(
                                 onClick = { selectedNoteIds = emptySet() },
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF333333)),
                                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
-                            ) { Text("Отмена", color = Color.White) }
+                            ) { Text(stringResource(R.string.btn_cancel), color = Color.White) }
                             Spacer(modifier = Modifier.width(12.dp))
-                            Text(text = "Выбрано: ${selectedNoteIds.count()}", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                            Text(text = stringResource(R.string.selected_count, selectedNoteIds.count()), color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                         }
                     } else {
                         val canRename = !isFolderProtected || isSessionUnlocked
@@ -121,7 +140,7 @@ fun FolderScreen(
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.clickable {
                                     if (canRename) isEditingName = true
-                                    else Toast.makeText(viewModel.getApplication(), "Сначала откройте папку отпечатком", Toast.LENGTH_SHORT).show()
+                                    else Toast.makeText(viewModel.getApplication(), (R.string.folder_unlock_first), Toast.LENGTH_SHORT).show()
                                 }.fillMaxWidth()
                             )
                         }
@@ -149,7 +168,7 @@ fun FolderScreen(
                                         selectedNoteIds = emptySet()
                                     }
                                 },
-                                colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color(0xFF6A5ACD)),
+                                colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color(0xFF8E24AA)),
                                 modifier = Modifier.size(40.dp)
                             ) { Text("📤", fontSize = 18.sp) }
 
@@ -166,7 +185,7 @@ fun FolderScreen(
                                     modifier = Modifier.background(Color(0xFF1E1E1E))
                                 ) {
                                     DropdownMenuItem(
-                                        text = { Text("Корень (без папки)", color = Color.White) },
+                                        text = { Text(stringResource(R.string.editor_folder_no_folder), color = Color.White)},
                                         onClick = {
                                             viewModel.moveMultipleNotes(selectedNoteIds.toList(), null)
                                             selectedNoteIds = emptySet()
@@ -191,7 +210,7 @@ fun FolderScreen(
                                     viewModel.deleteMultipleNotes(selectedNoteIds.toList())
                                     selectedNoteIds = emptySet()
                                 },
-                                colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color(0xFF900C3F)),
+                                colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color(0xFFE53935)),
                                 modifier = Modifier.size(40.dp)
                             ) { Text("🗑", fontSize = 18.sp) }
                         }
@@ -200,18 +219,33 @@ fun FolderScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Button(
-                                onClick = {
-                                    if (isFolderProtected) {
-                                        viewModel.unprotectFolder(folderId)
-                                        viewModel.lockFolderSession(folderId)
-                                    } else {
-                                        viewModel.protectFolder(folderId, "1234")
-                                        viewModel.lockFolderSession(folderId)
-                                    }
-                                },
-                                colors = ButtonDefaults.buttonColors(containerColor = if (isFolderProtected) Color(0xFF900C3F) else Color(0xFF386038))
-                            ) { Text(text = if (isFolderProtected) "🔒 Защищено" else "🔓 Открыто", color = Color.White) }
+                            // В decoy-режиме кнопка только показывает статус «🔒 Защищено»,
+                            // без действия (пользователь не должен менять защиту decoy-папки).
+                            if (isDecoyFolder && isDecoySession) {
+                                Button(
+                                    onClick = { /* noop */ },
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE53935))
+                                ) {
+                                    Text(text = stringResource(R.string.folder_protected), color = Color.White)
+                                }
+                            } else {
+                                Button(
+                                    onClick = {
+                                        if (isFolderProtected) {
+                                            viewModel.unprotectFolder(folderId)
+                                            viewModel.lockFolderSession(folderId)
+                                        } else {
+                                            viewModel.protectFolder(folderId)
+                                        }
+                                    },
+                                    colors = ButtonDefaults.buttonColors(containerColor = if (isFolderProtected) Color(0xFFE53935) else Color(0xFF43A047))
+                                ) {
+                                    Text(
+                                        text = if (isFolderProtected) stringResource(R.string.folder_protected) else stringResource(R.string.folder_open),
+                                        color = Color.White
+                                    )
+                                }
+                            }
 
                             Box(modifier = Modifier.padding(end = 8.dp)) {
                                 FilledIconButton(
@@ -224,6 +258,7 @@ fun FolderScreen(
                                             SortOrder.NEWEST -> "⏳"
                                             SortOrder.OLDEST -> "⌛"
                                             SortOrder.ALPHABETIC -> "🔤"
+                                            SortOrder.FAVORITES -> "⭐"
                                         },
                                         fontSize = 14.sp
                                     )
@@ -233,9 +268,10 @@ fun FolderScreen(
                                     onDismissRequest = { showSortMenu = false },
                                     modifier = Modifier.background(Color(0xFF1E1E1E))
                                 ) {
-                                    DropdownMenuItem(text = { Text("⏳ Сначала новые", color = Color.White) }, onClick = { viewModel.changeSortOrder(SortOrder.NEWEST); showSortMenu = false })
-                                    DropdownMenuItem(text = { Text("⌛ Сначала старые", color = Color.White) }, onClick = { viewModel.changeSortOrder(SortOrder.OLDEST); showSortMenu = false })
-                                    DropdownMenuItem(text = { Text("🔤 По алфавиту (А-Я)", color = Color.White) }, onClick = { viewModel.changeSortOrder(SortOrder.ALPHABETIC); showSortMenu = false })
+                                    DropdownMenuItem(text = { Text(stringResource(R.string.sort_newest), color = Color.White) }, onClick = { viewModel.setFolderSortOrder(folderId, SortOrder.NEWEST); showSortMenu = false })
+                                    DropdownMenuItem(text = { Text(stringResource(R.string.sort_oldest), color = Color.White) }, onClick = { viewModel.setFolderSortOrder(folderId, SortOrder.OLDEST); showSortMenu = false })
+                                    DropdownMenuItem(text = { Text(stringResource(R.string.sort_alphabetic), color = Color.White) }, onClick = { viewModel.setFolderSortOrder(folderId, SortOrder.ALPHABETIC); showSortMenu = false })
+                                    DropdownMenuItem(text = { Text(stringResource(R.string.sort_favorites), color = Color.White) }, onClick = { viewModel.setFolderSortOrder(folderId, SortOrder.FAVORITES); showSortMenu = false })
                                 }
                             }
                         }
@@ -247,7 +283,7 @@ fun FolderScreen(
                 TextField(
                     value = folderSearchQuery,
                     onValueChange = { folderSearchQuery = it },
-                    placeholder = { Text("Поиск в этой папке...", color = Color.Gray) },
+                    placeholder = { Text(stringResource(R.string.folder_search), color = Color.Gray) },
                     textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color.White),
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                     shape = RoundedCornerShape(10.dp),
@@ -256,7 +292,7 @@ fun FolderScreen(
             }
 
             LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
+                columns = GridCells.Adaptive(160.dp),
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(12.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -265,19 +301,10 @@ fun FolderScreen(
                 items(filteredFolderNotes, key = { it.id }) { note ->
                     val isSelected = selectedNoteIds.contains(note.id)
                     val cardColor = remember(note.color) { Color(note.color) }
-
-                    // Тяжелые вычисления неоновой рамки изолированы в remember
-                    val neonColor = remember(isSelected, note.color) {
-                        if (isSelected) {
-                            val hsv = FloatArray(3)
-                            android.graphics.Color.colorToHSV(note.color, hsv)
-                            hsv[1] = 0.95f
-                            hsv[2] = 1.0f
-                            Color(android.graphics.Color.HSVToColor(hsv))
-                        } else {
-                            Color.Transparent
-                        }
-                    }
+                    val neonColor = remember(isSelected, note.color) { NoteColors.neonBorder(note.color, isSelected) }
+                    val protectedText = stringResource(R.string.protected_note)
+                    val emptyNoteText = stringResource(R.string.editor_empty_note)
+                    val previewText = if (note.isEncrypted) protectedText else note.content.ifEmpty { emptyNoteText }
 
                     Card(
                         modifier = Modifier
@@ -304,7 +331,7 @@ fun FolderScreen(
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text(text = note.title, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                             Spacer(modifier = Modifier.height(6.dp))
-                            Text(text = note.content.ifEmpty { "Пустая заметка..." }, color = Color(0xFFCCCCCC), fontSize = 13.sp, maxLines = 4, overflow = TextOverflow.Ellipsis)
+                            Text(text = previewText, color = Color(0xFFEEEEEE), fontSize = 13.sp, maxLines = 4, overflow = TextOverflow.Ellipsis)
                         }
                     }
                 }
@@ -320,13 +347,17 @@ fun FolderScreen(
                     if (currentTime - lastFolderClickTime > 400L) {
                         lastFolderClickTime = currentTime
                         val newId = UUID.randomUUID().toString()
+                        // Передаём folderId в URL, чтобы EditorScreen создал заметку в этой папке,
+                        // а не в корне.
                         onNoteClick("$newId?isNew=true&folderId=$folderId")
                     }
                 },
                 containerColor = Color(0xFFBB86FC),
-                modifier = Modifier.align(Alignment.BottomEnd).padding(24.dp)
-            ) { Text("+ Заметка", modifier = Modifier.padding(horizontal = 16.dp), color = Color.Black, fontWeight = FontWeight.Bold) }
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .navigationBarsPadding()
+                    .padding(24.dp)
+            ) { Text(stringResource(R.string.add_note), modifier = Modifier.padding(horizontal = 16.dp), color = Color.Black, fontWeight = FontWeight.Bold) }
         }
     }
 }
-

@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
 }
 
 android {
@@ -17,8 +18,7 @@ android {
         minSdk = 29
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0"
-
+        versionName = "5.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -37,6 +37,10 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas")
     }
 }
 
@@ -61,8 +65,23 @@ dependencies {
     ksp(libs.room.compiler)
     implementation(libs.navigation.compose)
     implementation(libs.androidx.biometric)
-    implementation(libs.androidx.fragment.ktx) // Необходима для корректного наследования FragmentActivity
-}
-ksp {
-    arg("room.schemaLocation", "$projectDir/schemas")
+    implementation(libs.androidx.fragment.ktx)
+    // Hilt — через catalog, версия 2.60.1 (фикс KSP STAR null)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.hilt.navigation.compose)
+    implementation(libs.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
+    // WorkManager
+    implementation(libs.androidx.work.runtime.ktx)
+    // DocumentFile (зеркалирование .md)
+    implementation(libs.androidx.documentfile)
+    // DataStore (настройки: колонки сетки)
+    implementation(libs.androidx.datastore.preferences)
+    // Paging (для больших хранилищ)
+    implementation(libs.androidx.paging.runtime)
+    implementation(libs.androidx.paging.compose)
+    // Glance (виджет)
+    implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.glance.material3)
 }

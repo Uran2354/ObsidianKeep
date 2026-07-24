@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ObsidianKeep</string>
+
+    <!-- Main menu -->
+    <string name="tab_notes">Notes</string>
+    <string name="tab_folders">Folders</string>
+    <string name="title_main">Obsidian Keep </string>
+    <string name="search_notes">Search notes...</string>
+    <string name="search_folders">Search folders...</string>
+    <string name="sort_newest">⏳ Newest first</string>
+    <string name="sort_oldest">⌛ Oldest first</string>
+    <string name="sort_alphabetic">🔤 Alphabetical (A-Z)</string>
+    <string name="sort_favorites">⭐ Favorites first</string>
+
+    <!-- Menu -->
+    <string name="menu_search">🔍 Search</string>
+    <string name="menu_tags">🏷️ Tags</string>
+    <string name="menu_reminders">⏰ Reminders</string>
+    <string name="menu_settings">⚙️ Settings</string>
+    <string name="menu_export_zip">📤 Export to .zip</string>
+    <string name="menu_import_zip">📥 Import from .zip</string>
+    <string name="menu_import_md">📄 Import .md file</string>
+    <string name="menu_import_vault">📁 Import from folder (vault)</string>
+    <string name="menu_mirror">📂 Mirror to folder</string>
+
+    <!-- Buttons -->
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_save">Save</string>
+    <string name="btn_delete">Delete</string>
+    <string name="btn_restore">↩ Restore</string>
+    <string name="btn_restore_all">Restore all</string>
+    <string name="btn_clear_all">Clear all</string>
+    <string name="btn_undo">Undo</string>
+    <string name="btn_add_note">+ Note</string>
+    <string name="btn_add_folder">+ Folder</string>
+    <string name="btn_trash">Trash</string>
+
+    <!-- Editor -->
+    <string name="editor_title">Editor</string>
+    <string name="editor_title_placeholder">Note title</string>
+    <string name="editor_color_label">Card color:</string>
+    <string name="editor_actions_label">Actions: %s</string>
+    <string name="editor_links_label">Links: %1$d · Backlinks: %2$d</string>
+    <string name="editor_collapse_all">Collapse all</string>
+    <string name="editor_expand_all">Expand all</string>
+    <string name="editor_folder_root">Root</string>
+    <string name="editor_folder_no_folder">Root (no folder)</string>
+    <string name="editor_empty_note">Empty note...</string>
+    <string name="editor_placeholder">Start writing... [[Link]] connects notes.</string>
+    <string name="editor_no_title">Untitled</string>
+    <string name="editor_title_header">Header</string>
+    <string name="editor_links_none">No links</string>
+    <string name="editor_tags_none">No tags</string>
+    <string name="editor_tags_list">Tags: %s</string>
+    <string name="editor_tag_new">New tag...</string>
+
+    <!-- Trash -->
+    <string name="trash_title">Trash</string>
+    <string name="trash_hint">Items are deleted automatically after 10 days</string>
+    <string name="trash_empty">Trash is empty</string>
+    <string name="trash_confirm_clear">Clear trash?</string>
+    <string name="trash_confirm_clear_msg">All items will be permanently deleted.</string>
+    <string name="trash_section_folders">Folders</string>
+    <string name="trash_section_notes">Notes</string>
+    <string name="trash_deleted_days">Deleted: %s</string>
+    <string name="trash_days_left">left %d days</string>
+    <string name="trash_days_left_singular">%d days left</string>
+    <string name="trash_days_left_plural">%d days left</string>
+    <string name="trash_deleted_full">Deleted: %1$s · %2$d days left</string>
+
+    <!-- Reminders -->
+    <string name="reminders_title">⏰ Reminders</string>
+    <string name="reminders_empty">No active reminders</string>
+    <string name="reminders_overdue">⚠ overdue</string>
+    <string name="reminders_clear_all">Clear all</string>
+    <string name="reminders_confirm_clear">Clear all reminders?</string>
+    <string name="reminders_confirm_clear_msg">All active reminders will be removed. Notes will remain.</string>
+    <string name="reminder_snooze">Snooze 15 min</string>
+    <string name="reminder_channel_name">Reminders</string>
+    <string name="reminder_channel_desc">Reminders for task notes</string>
+    <string name="reminder_repeat_once">Once</string>
+    <string name="reminder_repeat_daily">🔁 daily</string>
+    <string name="reminder_repeat_weekdays">📅 weekdays</string>
+    <string name="reminder_repeat_weekly">🗓 weekly</string>
+    <string name="reminder_default_title">Note</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_grid_columns">Grid columns: %d</string>
+    <string name="settings_language">🌐 Language / Язык</string>
+    <string name="settings_lang_ru">Русский</string>
+    <string name="settings_lang_en">English</string>
+    <string name="settings_lang_restart">After switching, the app will restart with the selected language</string>
+    <string name="settings_sync">Synchronization</string>
+    <string name="settings_mirror">Mirror to folder</string>
+    <string name="settings_mirror_on">Enabled — .md files written to selected folder</string>
+    <string name="settings_mirror_off">Disabled</string>
+    <string name="settings_webdav">WebDAV sync</string>
+    <string name="settings_webdav_desc">Two-way sync with Obsidian on PC</string>
+    <string name="settings_webdav_click">WebDAV: Configure URL/login/password in sync/WebDavSyncManager</string>
+    <string name="settings_backup">Backup</string>
+    <string name="settings_export_zip">Save all notes to archive</string>
+    <string name="settings_import_zip">Restore from archive</string>
+    <string name="settings_import_md">Import one Markdown file</string>
+    <string name="settings_import_vault">Import all .md files from the folder</string>
+    <string name="settings_about">About</string>
+    <string name="settings_about_desc">Notes in Obsidian/Google Keep style.\nKotlin + Jetpack Compose + Room + Hilt.</string>
+
+    <!-- Search -->
+    <string name="search_title">Search</string>
+    <string name="search_placeholder">Search notes...</string>
+    <string name="search_no_results">Nothing found</string>
+    <string name="search_start">Start typing to search</string>
+    <string name="search_found">Found: %1$d</string>
+
+    <!-- Folders -->
+    <string name="folder_search">Search in this folder...</string>
+    <string name="folder_protected">🔒 Protected</string>
+    <string name="folder_open">🔓 Open</string>
+    <string name="folder_default_name">Folder %1$d</string>
+    <string name="folder_unlock_first">Unlock the folder with fingerprint first</string>
+
+    <!-- Tags -->
+    <string name="tags_title">🏷️ Tags</string>
+    <string name="tags_empty">No tags</string>
+    <string name="tags_add_hint">Add tags in the note editor</string>
+    <string name="tags_no_notes_with_tag">No notes with tag #%1$s</string>
+    <string name="tags_notes_count">Notes: %1$d</string>
+    <string name="tags_notes_count_short">%1$d notes</string>
+
+    <!-- Notifications -->
+    <string name="notif_reminder">Reminder</string>
+    <string name="notif_group_title">Reminders</string>
+
+    <!-- Links -->
+    <string name="links_in_note_label">🔗 Links in note:</string>
+    <string name="links_missing_hint">Gray ones — such notes do not exist yet (create a note with this title)</string>
+    <string name="backlinks_label">↩ Referenced by:</string>
+    <string name="links_empty_hint">No links. Use [[Note title]] to link notes.</string>
+
+    <!-- Biometric -->
+    <string name="biometric_title">Access to hidden folder</string>
+    <string name="biometric_subtitle">Place your finger on the scanner</string>
+    <string name="biometric_canceled">Access restricted: canceled</string>
+
+    <!-- Import / Export -->
+    <string name="import_default_title">Import</string>
+    <string name="import_md_count">Imported notes: %1$d</string>
+    <string name="md_not_found">.md files not found</string>
+    <string name="share_to_obsidian">Export to Obsidian (PC)</string>
+    <string name="share_notes_to_obsidian">Export notes to Obsidian</string>
+    <string name="export_error">Export error: %1$s</string>
+    <string name="pdf_continuation"> (continued)</string>
+
+    <!-- Widget -->
+    <string name="widget_no_notes">No notes</string>
+    <string name="widget_new_note">+ New note</string>
+
+    <!-- Markdown help -->
+    <string name="markdown_help_title">Markdown help</string>
+    <string name="md_help_headers">Headers</string>
+    <string name="md_help_h1"># Header 1</string>
+    <string name="md_help_h2">## Header 2</string>
+    <string name="md_help_h3">### Header 3</string>
+    <string name="md_help_h4">#### Header 4</string>
+    <string name="md_help_h1_desc">large</string>
+    <string name="md_help_h2_desc">medium</string>
+    <string name="md_help_h3_desc">smaller</string>
+    <string name="md_help_h4_desc">even smaller</string>
+    <string name="md_help_text_format">Text formatting</string>
+    <string name="md_help_bold">**bold text**</string>
+    <string name="md_help_bold_desc">bold</string>
+    <string name="md_help_italic">*italic*</string>
+    <string name="md_help_italic_desc">italic</string>
+    <string name="md_help_code">`code`</string>
+    <string name="md_help_code_desc">monospace background</string>
+    <string name="md_help_lists">Lists</string>
+    <string name="md_help_li1">- list item</string>
+    <string name="md_help_li1_desc">bulleted</string>
+    <string name="md_help_li2">* list item</string>
+    <string name="md_help_li2_desc">also bulleted</string>
+    <string name="md_help_ol1">1. first</string>
+    <string name="md_help_ol2">2. second</string>
+    <string name="md_help_ol_desc">numbered</string>
+    <string name="md_help_checklists">Checklists (tappable)</string>
+    <string name="md_help_todo">- [ ] task</string>
+    <string name="md_help_todo_desc">not done</string>
+    <string name="md_help_done">- [x] done</string>
+    <string name="md_help_done_desc">done</string>
+    <string name="md_help_check_hint">In 👁 Preview mode checkboxes are tappable — tap toggles the state and saves the note.</string>
+    <string name="md_help_links">Links</string>
+    <string name="md_help_wikilink">[[Note title]]</string>
+    <string name="md_help_wikilink_desc">link to note</string>
+    <string name="md_help_link_hint">If a note with this title exists — the link is clickable (purple). The Links panel at the bottom of the editor shows all links and backlinks.</string>
+    <string name="md_help_quotes">Quotes</string>
+    <string name="md_help_quote">&gt; quote</string>
+    <string name="md_help_quote_desc">block with vertical bar</string>
+    <string name="md_help_code_block">Code</string>
+    <string name="md_help_codeblock_open">```</string>
+    <string name="md_help_codeblock_open_desc">opens code block</string>
+    <string name="md_help_codeblock_close_desc">closes code block</string>
+    <string name="md_help_code_hint">Between triple backticks — monospace block.</string>
+    <string name="md_help_misc">Misc</string>
+    <string name="md_help_hr">---</string>
+    <string name="md_help_hr_desc">horizontal line</string>
+    <string name="md_help_modes">Editor modes</string>
+    <string name="md_help_edit_mode">✏️ Edit — plain text editor with line numbers.</string>
+    <string name="md_help_preview_mode">👁 Preview — rendered Markdown with tappable checkboxes and links.</string>
+
+    <!-- Autocomplete -->
+    <string name="autocomplete_help_title">Autocomplete</string>
+    <string name="autocomplete_help_link">[[Title</string>
+    <string name="autocomplete_help_link_desc">list of existing notes</string>
+    <string name="autocomplete_help_link_create">[[ + pick \"Create note\"</string>
+    <string name="autocomplete_help_link_create_desc">creates a new note</string>
+    <string name="autocomplete_help_link_pagination">Pagination for large storages</string>
+    <string name="autocomplete_help_link_pagination_desc">shows 30 at a time, loads more on scroll</string>
+    <string name="autocomplete_help_tag">#tag</string>
+    <string name="autocomplete_help_tag_desc">list of existing tags</string>
+    <string name="autocomplete_help_hint">When you type [[ or #, a suggestion panel appears above the editor. Tap an item to insert it.</string>
+
+    <!-- Images -->
+    <string name="images_help_title">Images</string>
+    <string name="images_help_syntax">![](attachments/…)</string>
+    <string name="images_help_syntax_desc">image from filesDir</string>
+    <string name="images_help_insert">🖼 button in actions block</string>
+    <string name="images_help_insert_desc">pick image from gallery</string>
+    <string name="images_help_hint">Images are stored in filesDir/attachments/&lt;noteId&gt;/&lt;uuid&gt;.png. Auto-resized to 1920px width. Orphaned files are cleaned up automatically when removed from content.</string>
+
+    <!-- Misc -->
+    <string name="selected_count">Selected: %d</string>
+    <string name="add_note">+ Note</string>
+    <string name="add_folder">+ Folder</string>
+    <string name="protected_note">🔒 Protected note</string>
+    <string name="quick_capture">Quick capture</string>
+    <string name="export_done">Export complete</string>
+    <string name="pdf_saved">PDF saved</string>
+    <string name="import_count">Imported: %1$d folders, %2$d notes</string>
+    <string name="mirror_on">Mirroring enabled</string>
+    <string name="mirror_off">Mirroring disabled</string>
+    <string name="mirror_access_denied">Failed to get folder access</string>
+    <string name="import_failed">Failed to import file</string>
+    <string name="delete_count_notes">Deleted notes: %1$d</string>
+    <string name="delete_count_folders">Deleted folders: %1$d</string>
+    <string name="widget_description">List of recent notes</string>
+
+    <!-- Find & Replace -->
+    <string name="find_replace_title">Find &amp; Replace</string>
+    <string name="find_placeholder">Find…</string>
+    <string name="replace_placeholder">Replace with…</string>
+    <string name="find_replace_count">Found: %1$d</string>
+    <string name="find_replace_replace_all">Replace all</string>
+    <string name="find_replace_replace_next">Replace</string>
+    <string name="find_replace_no_match">No matches found</string>
+
+    <!-- Export -->
+    <string name="export_html_saved">HTML saved</string>
+    <string name="export_txt_saved">TXT saved</string>
+    <string name="export_print_started">Printing started…</string>
+    <string name="export_menu_html">🌐 HTML</string>
+    <string name="export_menu_txt">📃 TXT</string>
+    <string name="export_menu_print">🖨 Print</string>
+    <string name="export_menu_pdf">📄 PDF</string>
+    <string name="export_menu_md">📤 Markdown</string>
+
+    <!-- PIN / lock -->
+    <string name="pin_setup_title">Set up PIN</string>
+    <string name="pin_enter_title">Enter PIN</string>
+    <string name="pin_confirm_title">Confirm PIN</string>
+    <string name="pin_wrong">Wrong PIN</string>
+    <string name="pin_empty">PIN cannot be empty</string>
+    <string name="pin_mismatch">PINs do not match</string>
+    <string name="pin_set">PIN set</string>
+    <string name="pin_cleared">PIN disabled</string>
+    <string name="pin_enter_current">Enter current PIN</string>
+    <string name="pin_settings_enable">Enable PIN</string>
+    <string name="pin_settings_change">Change PIN</string>
+    <string name="pin_settings_decoy">Decoy PIN (fake)</string>
+    <string name="pin_settings_decoy_hint">When this PIN is entered, a hidden folder with \"safe\" notes opens, named after the folder you tapped. Real protected folders remain inaccessible.</string>
+    <string name="pin_settings_autolock">Auto-lock (sec)</string>
+    <string name="pin_unlocked">App unlocked</string>
+    <string name="pin_use_biometric">Or use biometrics</string>
+
+    <!-- Graph view -->
+    <string name="graph_title">Link graph</string>
+    <string name="graph_empty">No links between notes yet. Use [[links]] in the editor.</string>
+    <string name="graph_nodes">Nodes: %1$d · Links: %2$d</string>
+    <string name="graph_zoom_hint">Pinch — zoom · Drag — pan · Tap a node — open</string>
+
+    <!-- Filtered search -->
+    <string name="advanced_search_title">Advanced search</string>
+    <string name="filter_color">Color</string>
+    <string name="filter_folder">Folder</string>
+    <string name="filter_tag">Tag</string>
+    <string name="filter_has_reminder">Has reminder</string>
+    <string name="filter_is_favorite">Favorites</string>
+    <string name="filter_any_folder">Any folder</string>
+    <string name="filter_any_color">Any color</string>
+    <string name="filter_any_tag">Any tag</string>
+    <string name="filter_no_folder">No folder (root)</string>
+    <string name="filter_reset">Reset filters</string>
+    <string name="filter_results">Results: %1$d</string>
+
+    <!-- Audio notes -->
+    <string name="audio_record_start">● Record</string>
+    <string name="audio_record_stop">■ Stop</string>
+    <string name="audio_play">▶ Play</string>
+    <string name="audio_stop_play">■ Stop</string>
+    <string name="audio_delete">Delete audio</string>
+    <string name="audio_permission_required">Microphone permission required</string>
+    <string name="audio_record_error">Recording error</string>
+    <string name="audio_attached">Audio attached (%1$s)</string>
+    <string name="audio_duration">%1$02d:%2$02d</string>
+    <string name="audio_notes_title">🎙 Audio notes</string>
+    <string name="audio_notes_empty">No audio notes</string>
+    <string name="audio_notes_record_new">● Record new</string>
+    <string name="audio_recording_in_progress">Recording…</string>
+    <string name="audio_no_notes_for_recording">First create a note, then record from its editor</string>
+    <string name="audio_progress_format">%1$s / %2$s</string>
+    <string name="audio_unknown_note">(untitled)</string>
+
+    <!-- Autocomplete -->
+    <string name="autocomplete_create_note">Create note \"%1$s\"</string>
+    <string name="autocomplete_no_tags">No tags yet</string>
+
+    <!-- Widget -->
+    <string name="widget_folder_picker">Widget folder</string>
+    <string name="widget_all_notes">All notes</string>
+    <string name="widget_size_small">2x2 (compact)</string>
+    <string name="widget_size_wide">4x2 (wide)</string>
+    <string name="widget_size_large">4x4 (large)</string>
+
+    <!-- Calendar -->
+    <string name="calendar_title">📅 Calendar</string>
+    <string name="calendar_view_month">Month</string>
+    <string name="calendar_view_week">Week</string>
+    <string name="calendar_view_year">Year</string>
+    <string name="calendar_view_day">Day</string>
+    <string name="calendar_today">Today</string>
+    <string name="calendar_no_events">No notes with reminders in this period</string>
+    <string name="calendar_event_count">%1$d rem.</string>
+    <string name="calendar_no_reminder">No reminder</string>
+    <string name="calendar_add_note">+ Note</string>
+    <string name="calendar_mon">Mon</string>
+    <string name="calendar_tue">Tue</string>
+    <string name="calendar_wed">Wed</string>
+    <string name="calendar_thu">Thu</string>
+    <string name="calendar_fri">Fri</string>
+    <string name="calendar_sat">Sat</string>
+    <string name="calendar_sun">Sun</string>
+    <string name="calendar_months_jan">January</string>
+    <string name="calendar_months_feb">February</string>
+    <string name="calendar_months_mar">March</string>
+    <string name="calendar_months_apr">April</string>
+    <string name="calendar_months_may">May</string>
+    <string name="calendar_months_jun">June</string>
+    <string name="calendar_months_jul">July</string>
+    <string name="calendar_months_aug">August</string>
+    <string name="calendar_months_sep">September</string>
+    <string name="calendar_months_oct">October</string>
+    <string name="calendar_months_nov">November</string>
+    <string name="calendar_months_dec">December</string>
+
+    <!-- Decoy / special folder -->
+    <string name="decoy_folder_name">Notes</string>
+</resources>

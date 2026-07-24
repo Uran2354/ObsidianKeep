@@ -1,3 +1,368 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">ObsidianKeep</string>
+
+    <!-- Главное меню -->
+    <string name="tab_notes">Заметки</string>
+    <string name="tab_folders">Папки</string>
+    <string name="title_main">Obsidian Keep </string>
+    <string name="search_notes">Поиск по заметкам...</string>
+    <string name="search_folders">Поиск папок...</string>
+    <string name="sort_newest">⏳ Сначала новые</string>
+    <string name="sort_oldest">⌛ Сначала старые</string>
+    <string name="sort_alphabetic">🔤 По алфавиту (А-Я)</string>
+    <string name="sort_favorites">⭐ Избранные сначала</string>
+
+    <!-- Меню -->
+    <string name="menu_search">🔍 Поиск</string>
+    <string name="menu_tags">🏷️ Теги</string>
+    <string name="menu_reminders">⏰ Напоминания</string>
+    <string name="menu_settings">⚙️ Настройки</string>
+    <string name="menu_export_zip">📤 Экспорт в .zip</string>
+    <string name="menu_import_zip">📥 Импорт из .zip</string>
+    <string name="menu_import_md">📄 Импорт .md файла</string>
+    <string name="menu_import_vault">📁 Импорт из папки (vault)</string>
+    <string name="menu_mirror">📂 Зеркалирование в папку</string>
+
+    <!-- Кнопки -->
+    <string name="btn_cancel">Отмена</string>
+    <string name="btn_save">Сохранить</string>
+    <string name="btn_delete">Удалить</string>
+    <string name="btn_restore">↩ Восстановить</string>
+    <string name="btn_restore_all">Восстановить всё</string>
+    <string name="btn_clear_all">Очистить всё</string>
+    <string name="btn_undo">Отменить</string>
+    <string name="btn_add_note">+ Заметка</string>
+    <string name="btn_add_folder">+ Папка</string>
+    <string name="btn_trash">Корзина</string>
+
+    <!-- Редактор -->
+    <string name="editor_title">Редактор</string>
+    <string name="editor_title_placeholder">Заголовок заметки</string>
+    <string name="editor_color_label">Цвет карточки:</string>
+    <string name="editor_actions_label">Действия: %s</string>
+    <string name="editor_links_label">Ссылки: %1$d · Сюда ссылаются: %2$d</string>
+    <string name="editor_collapse_all">Свернуть всё</string>
+    <string name="editor_expand_all">Развернуть всё</string>
+    <string name="editor_folder_root">Корень</string>
+    <string name="editor_folder_no_folder">Корень (без папки)</string>
+    <string name="editor_empty_note">Пустая заметка...</string>
+    <string name="editor_placeholder">Начните писать... [[Ссылка]] свяжет заметки.</string>
+    <string name="editor_no_title">Без названия</string>
+    <string name="editor_title_header">Заголовок</string>
+    <string name="editor_links_none">Ссылки отсутствуют</string>
+    <string name="editor_tags_none">Теги отсутствуют</string>
+    <string name="editor_tags_list">Теги: %s</string>
+    <string name="editor_tag_new">Новый тег...</string>
+
+    <!-- Корзина -->
+    <string name="trash_title">Корзина</string>
+    <string name="trash_hint">Элементы удаляются автоматически через 10 дней</string>
+    <string name="trash_empty">Корзина пуста</string>
+    <string name="trash_confirm_clear">Очистить корзину?</string>
+    <string name="trash_confirm_clear_msg">Все элементы будут удалены безвозвратно.</string>
+    <string name="trash_section_folders">Папки</string>
+    <string name="trash_section_notes">Заметки</string>
+    <string name="trash_deleted_days">Удалено: %s</string>
+    <string name="trash_days_left">осталось %d дн.</string>
+    <string name="trash_days_left_singular">осталось %d день</string>
+    <string name="trash_days_left_plural">осталось %d дней</string>
+    <string name="trash_deleted_full">Удалено: %1$s · осталось %2$d дн.</string>
+
+    <!-- Напоминания -->
+    <string name="reminders_title">⏰ Напоминания</string>
+    <string name="reminders_empty">Нет активных напоминаний</string>
+    <string name="reminders_overdue">⚠ просрочено</string>
+    <string name="reminders_clear_all">Очистить все</string>
+    <string name="reminders_confirm_clear">Очистить все напоминания?</string>
+    <string name="reminders_confirm_clear_msg">Будут сняты все активные напоминания. Заметки останутся.</string>
+    <string name="reminder_snooze">Отложить 15 мин</string>
+    <string name="reminder_channel_name">Напоминания</string>
+    <string name="reminder_channel_desc">Напоминания о заметках-задачах</string>
+    <string name="reminder_repeat_once">Один раз</string>
+    <string name="reminder_repeat_daily">🔁 ежедневно</string>
+    <string name="reminder_repeat_weekdays">📅 по будням</string>
+    <string name="reminder_repeat_weekly">🗓 еженедельно</string>
+    <string name="reminder_default_title">Заметка</string>
+
+    <!-- Настройки -->
+    <string name="settings_title">Настройки</string>
+    <string name="settings_appearance">Внешний вид</string>
+    <string name="settings_grid_columns">Колонки сетки: %d</string>
+    <string name="settings_language">🌐 Язык / Language</string>
+    <string name="settings_lang_ru">Русский</string>
+    <string name="settings_lang_en">English</string>
+    <string name="settings_lang_restart">После переключения приложение перезапустится с выбранным языком</string>
+    <string name="settings_sync">Синхронизация</string>
+    <string name="settings_mirror">Зеркалирование в папку</string>
+    <string name="settings_mirror_on">Включено — .md файлы пишутся в выбранную папку</string>
+    <string name="settings_mirror_off">Выключено</string>
+    <string name="settings_webdav">WebDAV синхронизация</string>
+    <string name="settings_webdav_desc">Двусторонняя синхронизация с Obsidian на ПК</string>
+    <string name="settings_webdav_click">WebDAV: настройте URL/логин/пароль в sync/WebDavSyncManager</string>
+    <string name="settings_backup">Резервное копирование</string>
+    <string name="settings_export_zip">Сохранить все заметки в архив</string>
+    <string name="settings_import_zip">Восстановить из архива</string>
+    <string name="settings_import_md">Импортировать один Markdown файл</string>
+    <string name="settings_import_vault">Импортировать все .md из папки</string>
+    <string name="settings_about">О приложении</string>
+    <string name="settings_about_desc">Заметки в стиле Obsidian/Google Keep.\nKotlin + Jetpack Compose + Room + Hilt.</string>
+
+    <!-- Поиск -->
+    <string name="search_title">Поиск</string>
+    <string name="search_placeholder">Поиск по заметкам...</string>
+    <string name="search_no_results">Ничего не найдено</string>
+    <string name="search_start">Начните вводить для поиска</string>
+    <string name="search_found">Найдено: %1$d</string>
+
+    <!-- Папки -->
+    <string name="folder_search">Поиск в этой папке...</string>
+    <string name="folder_protected">🔒 Защищено</string>
+    <string name="folder_open">🔓 Открыто</string>
+    <string name="folder_default_name">Папка %1$d</string>
+    <string name="folder_unlock_first">Сначала откройте папку отпечатком</string>
+
+    <!-- Теги -->
+    <string name="tags_title">🏷️ Теги</string>
+    <string name="tags_empty">Нет тегов</string>
+    <string name="tags_add_hint">Добавьте теги в редакторе заметки</string>
+    <string name="tags_no_notes_with_tag">Нет заметок с тегом #%1$s</string>
+    <string name="tags_notes_count">Заметок: %1$d</string>
+    <string name="tags_notes_count_short">%1$d заметок</string>
+
+    <!-- Уведомления -->
+    <string name="notif_reminder">Напоминание</string>
+    <string name="notif_group_title">Напоминания</string>
+
+    <!-- Ссылки -->
+    <string name="links_in_note_label">🔗 Ссылки в заметке:</string>
+    <string name="links_missing_hint">Серые — таких заметок ещё нет (создайте заметку с таким заголовком)</string>
+    <string name="backlinks_label">↩ Сюда ссылаются:</string>
+    <string name="links_empty_hint">Нет ссылок. Используйте [[Заголовок заметки]] для связи.</string>
+
+    <!-- Биометрия -->
+    <string name="biometric_title">Доступ к скрытой папке</string>
+    <string name="biometric_subtitle">Приложите палец к сканеру</string>
+    <string name="biometric_canceled">Доступ ограничен: отмена</string>
+
+    <!-- Импорт / Экспорт -->
+    <string name="import_default_title">Импорт</string>
+    <string name="import_md_count">Импортировано заметок: %1$d</string>
+    <string name="md_not_found">.md файлы не найдены</string>
+    <string name="share_to_obsidian">Экспорт в Obsidian (ПК)</string>
+    <string name="share_notes_to_obsidian">Экспорт заметок в Obsidian</string>
+    <string name="export_error">Ошибка экспорта: %1$s</string>
+    <string name="pdf_continuation"> (продолжение)</string>
+
+    <!-- Виджет -->
+    <string name="widget_no_notes">Нет заметок</string>
+    <string name="widget_new_note">+ Новая заметка</string>
+
+    <!-- Markdown справка -->
+    <string name="markdown_help_title">Markdown справка</string>
+    <string name="md_help_headers">Заголовки</string>
+    <string name="md_help_h1"># Заголовок 1</string>
+    <string name="md_help_h2">## Заголовок 2</string>
+    <string name="md_help_h3">### Заголовок 3</string>
+    <string name="md_help_h4">#### Заголовок 4</string>
+    <string name="md_help_h1_desc">крупный</string>
+    <string name="md_help_h2_desc">средний</string>
+    <string name="md_help_h3_desc">меньше</string>
+    <string name="md_help_h4_desc">ещё меньше</string>
+    <string name="md_help_text_format">Форматирование текста</string>
+    <string name="md_help_bold">**жирный текст**</string>
+    <string name="md_help_bold_desc">полужирный</string>
+    <string name="md_help_italic">*курсив*</string>
+    <string name="md_help_italic_desc">наклонный</string>
+    <string name="md_help_code">`код`</string>
+    <string name="md_help_code_desc">моноширинный фон</string>
+    <string name="md_help_lists">Списки</string>
+    <string name="md_help_li1">- пункт списка</string>
+    <string name="md_help_li1_desc">маркированный</string>
+    <string name="md_help_li2">* пункт списка</string>
+    <string name="md_help_li2_desc">тоже маркированный</string>
+    <string name="md_help_ol1">1. первый</string>
+    <string name="md_help_ol2">2. второй</string>
+    <string name="md_help_ol_desc">нумерованный</string>
+    <string name="md_help_checklists">Чек-листы (тапаемые)</string>
+    <string name="md_help_todo">- [ ] задача</string>
+    <string name="md_help_todo_desc">невыполнено</string>
+    <string name="md_help_done">- [x] выполнено</string>
+    <string name="md_help_done_desc">выполнено</string>
+    <string name="md_help_check_hint">В режиме 👁 Просмотр чекбоксы кликабельны — тап переключает состояние и сохраняет заметку.</string>
+    <string name="md_help_links">Ссылки</string>
+    <string name="md_help_wikilink">[[Заголовок заметки]]</string>
+    <string name="md_help_wikilink_desc">ссылка на заметку</string>
+    <string name="md_help_link_hint">Если заметка с таким заголовком существует — ссылка кликабельна (фиолетовая). Внизу редактора панель «Ссылки» показывает все ссылки и обратные ссылки.</string>
+    <string name="md_help_quotes">Цитаты</string>
+    <string name="md_help_quote">&gt; цитата</string>
+    <string name="md_help_quote_desc">блок с вертикальной полосой</string>
+    <string name="md_help_code_block">Код</string>
+    <string name="md_help_codeblock_open">```</string>
+    <string name="md_help_codeblock_open_desc">открывает блок кода</string>
+    <string name="md_help_codeblock_close_desc">закрывает блок кода</string>
+    <string name="md_help_code_hint">Между тройными обратными кавычками — моноширинный блок.</string>
+    <string name="md_help_misc">Прочее</string>
+    <string name="md_help_hr">---</string>
+    <string name="md_help_hr_desc">горизонтальная линия</string>
+    <string name="md_help_modes">Режимы редактора</string>
+    <string name="md_help_edit_mode">✏️ Правка — обычный текстовый редактор с нумерацией строк.</string>
+    <string name="md_help_preview_mode">👁 Просмотр — отрендеренный Markdown с кликабельными чекбоксами и ссылками.</string>
+
+    <!-- Автодополнение -->
+    <string name="autocomplete_help_title">Автодополнение</string>
+    <string name="autocomplete_help_link">[[Заголовок</string>
+    <string name="autocomplete_help_link_desc">список существующих заметок</string>
+    <string name="autocomplete_help_link_create">[[ + выбор «Создать заметку»</string>
+    <string name="autocomplete_help_link_create_desc">создаёт новую заметку</string>
+    <string name="autocomplete_help_link_pagination">Пагинация для больших хранилищ</string>
+    <string name="autocomplete_help_link_pagination_desc">показывает по 30, подгружает при прокрутке</string>
+    <string name="autocomplete_help_tag">#тег</string>
+    <string name="autocomplete_help_tag_desc">список существующих тегов</string>
+    <string name="autocomplete_help_hint">При вводе [[ или # над полем редактора появляется панель с подсказками. Тап по элементу вставляет его в текст.</string>
+
+    <!-- Изображения -->
+    <string name="images_help_title">Изображения</string>
+    <string name="images_help_syntax">![](attachments/…)</string>
+    <string name="images_help_syntax_desc">изображение из filesDir</string>
+    <string name="images_help_insert">🖼 кнопка в блоке действий</string>
+    <string name="images_help_insert_desc">выбор изображения из галереи</string>
+    <string name="images_help_hint">Изображения хранятся в filesDir/attachments/&lt;noteId&gt;/&lt;uuid&gt;.png. Автоматически масштабируются по ширине 1920px. При удалении из контента — осиротевшие файлы чистятся автоматически.</string>
+
+    <!-- Прочее -->
+    <string name="selected_count">Выбрано: %d</string>
+    <string name="add_note">+ Заметка</string>
+    <string name="add_folder">+ Папка</string>
+    <string name="protected_note">🔒 Защищённая заметка</string>
+    <string name="quick_capture">Быстрый захват</string>
+    <string name="export_done">Экспорт завершён</string>
+    <string name="pdf_saved">PDF сохранён</string>
+    <string name="import_count">Импорт: %1$d папок, %2$d заметок</string>
+    <string name="mirror_on">Зеркалирование включено</string>
+    <string name="mirror_off">Зеркалирование выключено</string>
+    <string name="mirror_access_denied">Не удалось получить доступ к папке</string>
+    <string name="import_failed">Не удалось импортировать файл</string>
+    <string name="delete_count_notes">Удалено заметок: %1$d</string>
+    <string name="delete_count_folders">Удалено папок: %1$d</string>
+    <string name="widget_description">Список последних заметок</string>
+
+    <!-- Find & Replace -->
+    <string name="find_replace_title">Поиск и замена</string>
+    <string name="find_placeholder">Найти…</string>
+    <string name="replace_placeholder">Заменить на…</string>
+    <string name="find_replace_count">Найдено: %1$d</string>
+    <string name="find_replace_replace_all">Заменить все</string>
+    <string name="find_replace_replace_next">Заменить</string>
+    <string name="find_replace_no_match">Совпадений не найдено</string>
+
+    <!-- Экспорт -->
+    <string name="export_html_saved">HTML сохранён</string>
+    <string name="export_txt_saved">TXT сохранён</string>
+    <string name="export_print_started">Печать начата…</string>
+    <string name="export_menu_html">🌐 HTML</string>
+    <string name="export_menu_txt">📃 TXT</string>
+    <string name="export_menu_print">🖨 Печать</string>
+    <string name="export_menu_pdf">📄 PDF</string>
+    <string name="export_menu_md">📤 Markdown</string>
+
+    <!-- PIN-код / блокировка -->
+    <string name="pin_setup_title">Установка PIN-кода</string>
+    <string name="pin_enter_title">Введите PIN-код</string>
+    <string name="pin_confirm_title">Повторите PIN-код</string>
+    <string name="pin_wrong">Неверный PIN-код</string>
+    <string name="pin_empty">PIN не может быть пустым</string>
+    <string name="pin_mismatch">PIN-коды не совпадают</string>
+    <string name="pin_set">PIN-код установлен</string>
+    <string name="pin_cleared">PIN-код отключён</string>
+    <string name="pin_enter_current">Введите текущий PIN-код</string>
+    <string name="pin_settings_enable">Включить PIN-код</string>
+    <string name="pin_settings_change">Сменить PIN-код</string>
+    <string name="pin_settings_decoy">Decoy PIN (фейковый)</string>
+    <string name="pin_settings_decoy_hint">При вводе этого PIN открывается скрытая папка с «безобидными» заметками под именем той папки, в которую вы нажали. Реальные защищённые папки остаются недоступны.</string>
+    <string name="pin_settings_autolock">Авто-блокировка (сек)</string>
+    <string name="pin_unlocked">Приложение разблокировано</string>
+    <string name="pin_use_biometric">Или использовать биометрию</string>
+
+    <!-- Граф связей -->
+    <string name="graph_title">Граф связей</string>
+    <string name="graph_empty">Нет связей между заметками. Используйте [[ссылки]] в редакторе.</string>
+    <string name="graph_nodes">Узлов: %1$d · Связей: %2$d</string>
+    <string name="graph_zoom_hint">Щипок — масштаб · Перетаскивание — перемещение · Тап по узлу — открыть</string>
+
+    <!-- Поиск с фильтрами -->
+    <string name="advanced_search_title">Расширенный поиск</string>
+    <string name="filter_color">Цвет</string>
+    <string name="filter_folder">Папка</string>
+    <string name="filter_tag">Тег</string>
+    <string name="filter_has_reminder">С напоминанием</string>
+    <string name="filter_is_favorite">Избранные</string>
+    <string name="filter_any_folder">Любая папка</string>
+    <string name="filter_any_color">Любой цвет</string>
+    <string name="filter_any_tag">Любой тег</string>
+    <string name="filter_no_folder">Без папки (корень)</string>
+    <string name="filter_reset">Сбросить фильтры</string>
+    <string name="filter_results">Результатов: %1$d</string>
+
+    <!-- Аудио-заметки -->
+    <string name="audio_record_start">● Запись</string>
+    <string name="audio_record_stop">■ Стоп</string>
+    <string name="audio_play">▶ Воспр.</string>
+    <string name="audio_stop_play">■ Стоп</string>
+    <string name="audio_delete">Удалить аудио</string>
+    <string name="audio_permission_required">Требуется разрешение на запись аудио</string>
+    <string name="audio_record_error">Ошибка записи</string>
+    <string name="audio_attached">Аудио прикреплено (%1$s)</string>
+    <string name="audio_duration">%1$02d:%2$02d</string>
+    <string name="audio_notes_title">🎙 Аудио-заметки</string>
+    <string name="audio_notes_empty">Нет аудио-заметок</string>
+    <string name="audio_notes_record_new">● Записать новое</string>
+    <string name="audio_recording_in_progress">Идёт запись…</string>
+    <string name="audio_no_notes_for_recording">Сначала создайте заметку, потом запись из её редактора</string>
+    <string name="audio_progress_format">%1$s / %2$s</string>
+    <string name="audio_unknown_note">(без названия)</string>
+
+    <!-- Автодополнение -->
+    <string name="autocomplete_create_note">Создать заметку «%1$s»</string>
+    <string name="autocomplete_no_tags">Тегов пока нет</string>
+
+    <!-- Виджет -->
+    <string name="widget_folder_picker">Папка для виджета</string>
+    <string name="widget_all_notes">Все заметки</string>
+    <string name="widget_size_small">2x2 (компактный)</string>
+    <string name="widget_size_wide">4x2 (широкий)</string>
+    <string name="widget_size_large">4x4 (большой)</string>
+
+    <!-- Календарь -->
+    <string name="calendar_title">📅 Календарь</string>
+    <string name="calendar_view_month">Месяц</string>
+    <string name="calendar_view_week">Неделя</string>
+    <string name="calendar_view_year">Год</string>
+    <string name="calendar_view_day">День</string>
+    <string name="calendar_today">Сегодня</string>
+    <string name="calendar_no_events">Нет заметок с напоминаниями в этом периоде</string>
+    <string name="calendar_event_count">%1$d напом.</string>
+    <string name="calendar_no_reminder">Без напоминания</string>
+    <string name="calendar_add_note">+ Заметка</string>
+    <string name="calendar_mon">Пн</string>
+    <string name="calendar_tue">Вт</string>
+    <string name="calendar_wed">Ср</string>
+    <string name="calendar_thu">Чт</string>
+    <string name="calendar_fri">Пт</string>
+    <string name="calendar_sat">Сб</string>
+    <string name="calendar_sun">Вс</string>
+    <string name="calendar_months_jan">Январь</string>
+    <string name="calendar_months_feb">Февраль</string>
+    <string name="calendar_months_mar">Март</string>
+    <string name="calendar_months_apr">Апрель</string>
+    <string name="calendar_months_may">Май</string>
+    <string name="calendar_months_jun">Июнь</string>
+    <string name="calendar_months_jul">Июль</string>
+    <string name="calendar_months_aug">Август</string>
+    <string name="calendar_months_sep">Сентябрь</string>
+    <string name="calendar_months_oct">Октябрь</string>
+    <string name="calendar_months_nov">Ноябрь</string>
+    <string name="calendar_months_dec">Декабрь</string>
+
+    <!-- Decoy / специальная папка -->
+    <string name="decoy_folder_name">Заметки</string>
 </resources>
