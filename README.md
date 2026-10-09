@@ -1,4 +1,4 @@
-# ObsidianKeep v5
+# ObsidianKeep v1.5
 
 Заметки в стиле Obsidian/Google Keep для Android. Kotlin + Jetpack Compose + Material 3 + Room + Hilt + WorkManager.
 
