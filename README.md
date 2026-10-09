@@ -1,4 +1,4 @@
-# ObsidianKeep (Android)
+# ObsidianKeep-v2 (Android)
 
 Мобильные заметки в стиле Obsidian × Google Keep — готовый Gradle-проект
 для актуальной Android Studio (AGP 9.4.1, Gradle 9.8.1, встроенный Kotlin).
